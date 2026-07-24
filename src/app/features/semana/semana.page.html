@@ -1,0 +1,12 @@
+<div class="semana">
+  @for (d of dieta(); track d.dia; let i = $index) {
+    <button class="dcard" [class.hoy]="i === hoyI" (click)="ir(i)">
+      <div class="top">
+        <strong>{{ d.dia }}</strong>
+        <span class="tag" [class.gris]="!esFuerza(i)">{{ tituloCorto(i) }}</span>
+      </div>
+      <p><b>Comida:</b> {{ resumenComida(d) }}</p>
+      <p><b>Cena:</b> {{ resumenCena(d) }}</p>
+    </button>
+  }
+</div>

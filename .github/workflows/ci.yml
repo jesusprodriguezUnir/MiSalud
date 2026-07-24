@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # El emulador de Firestore corre sobre la JVM.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - run: npm ci
+
+      - name: Tests de lógica pura
+        run: npm test
+
+      - name: Tests de reglas de Firestore (emulador)
+        run: npx firebase emulators:exec --only firestore "npx vitest run --config vitest.rules.config.ts"
+
+      - name: Build de producción
+        run: npm run build
+
+  deploy:
+    needs: build-test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+
+      # Publica hosting Y reglas de Firestore con la cuenta de servicio.
+      # Crea el secret FIREBASE_SERVICE_ACCOUNT con el JSON de la cuenta de
+      # servicio (Consola > Configuración > Cuentas de servicio > Generar clave).
+      - name: Desplegar a Firebase
+        run: |
+          echo "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
+          npx firebase deploy --only firestore:rules,hosting --project TU_PROYECTO --non-interactive
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}

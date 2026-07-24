@@ -1,0 +1,37 @@
+<div class="card">
+  <div class="card-h">
+    <h3>Lista de la compra</h3>
+    <button class="btn ghost mini" (click)="toggleTodos()">Todos</button>
+  </div>
+  <div class="compra-dias">
+    @for (d of dias; track $index; let i = $index) {
+      <button class="pill" [class.on]="activo(i)" (click)="toggleDia(i)">{{ d }}</button>
+    }
+  </div>
+  <div class="card-b">
+    @if (!hayItems()) {
+      <p class="empty">Selecciona al menos un día.</p>
+    }
+    @for (g of grupos(); track g.categoria) {
+      <div class="cat">{{ g.categoria }}</div>
+      @for (v of g.items; track v.n) {
+        <div class="item">
+          <div class="n">{{ v.n }}</div>
+          <div class="c">
+            @if (v.g) {
+              {{ num(v.g) }} g{{ v.aproximado ? ' +' : '' }}
+            } @else {
+              {{ v.veces }} ración{{ v.veces > 1 ? 'es' : '' }}
+            }
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>
+
+<div class="aviso">
+  Cantidades sumadas de las raciones del plan para los días marcados, incluyendo los ingredientes de
+  cada receta. Añade un margen en fruta y verdura por mermas y en los formatos que solo se venden por
+  envase (latas, tarrinas, barras de pan).
+</div>

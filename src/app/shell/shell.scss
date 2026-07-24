@@ -1,0 +1,103 @@
+// Estilos del marco: cabecera pegajosa, banda offline y barra de pestañas.
+// Portados de legacy/public/index.html.
+:host {
+  display: block;
+}
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+.hbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 0;
+}
+.hbar .nav {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+.hdate {
+  flex: 1;
+  text-align: center;
+  min-width: 0;
+}
+.hdate strong {
+  display: block;
+  font-size: 16px;
+  text-transform: capitalize;
+}
+.hdate span {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+}
+.logout {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--muted);
+  background: none;
+  border: 0;
+}
+
+nav.tabs {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  display: flex;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+nav.tabs a {
+  flex: 1;
+  background: none;
+  border: 0;
+  padding: 10px 4px 12px;
+  color: var(--muted);
+  font-size: 11px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  text-decoration: none;
+}
+nav.tabs a svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+nav.tabs a.on {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+main {
+  padding: 16px 0 24px;
+}
+
+.offline {
+  background: var(--warn-soft);
+  color: var(--warn);
+  font-size: 12px;
+  text-align: center;
+  padding: 5px;
+}

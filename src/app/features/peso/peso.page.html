@@ -1,0 +1,96 @@
+@let u = ultimo();
+
+<div class="kpis">
+  <div class="kpi"><span>Actual</span><strong>{{ u ? num(u.peso) + ' kg' : '—' }}</strong></div>
+  <div class="kpi">
+    <span>Media 7 d</span><strong>{{ media7() !== null ? num(media7()!) + ' kg' : '—' }}</strong>
+  </div>
+  <div class="kpi">
+    <span>Desde el inicio</span>
+    <strong [class.down]="delta() !== null && delta()! < 0" [class.up]="delta() !== null && delta()! > 0">
+      {{ delta() === null ? '—' : (delta()! > 0 ? '+' : '') + num(delta()!) + ' kg' }}
+    </strong>
+  </div>
+  <div class="kpi">
+    <span>Hasta objetivo</span><strong>{{ falta() === null ? '—' : num(falta()!) + ' kg' }}</strong>
+  </div>
+  <div class="kpi">
+    <span>Ritmo semanal</span>
+    <strong [class.down]="ritmo() !== null && ritmo()! < 0" [class.up]="ritmo() !== null && ritmo()! > 0">
+      {{ ritmo() === null ? '—' : (ritmo()! > 0 ? '+' : '') + num(ritmo()!) + ' kg' }}
+    </strong>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-h"><h3>Registrar peso</h3></div>
+  <div class="card-b">
+    <div class="form-row">
+      <input type="date" [(ngModel)]="fecha" name="fecha" />
+      <input
+        type="number"
+        [(ngModel)]="pesoInput"
+        name="peso"
+        step="0.1"
+        min="30"
+        max="200"
+        placeholder="kg"
+        inputmode="decimal"
+      />
+      <button class="btn mini" (click)="guardar()">Guardar</button>
+    </div>
+    <div class="err">{{ error() }}</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-h"><h3>Evolución</h3></div>
+  <app-peso-chart [pesos]="pesos()" [objetivo]="perfil().objetivo" />
+  <div class="leyenda">
+    <span><i style="border-color:var(--accent)"></i>Media de 7 días</span>
+    <span><i style="border-color:var(--accent);opacity:.4"></i>Peso diario</span>
+    <span><i style="border-color:var(--warn);border-top-style:dashed"></i>Objetivo {{ num(perfil().objetivo) }} kg</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-h"><h3>Registros</h3><span class="tag gris">{{ pesos().length }}</span></div>
+  <div class="card-b">
+    @if (filas().length) {
+      <table class="pesos">
+        @for (f of filas(); track f.fecha) {
+          <tr>
+            <td>
+              {{ fmtDia(f.fecha) }}
+              @if (f.delta !== null) {
+                <span class="c" style="color:var(--muted);font-size:12px">
+                  {{ (f.delta > 0 ? '+' : '') + num(f.delta) }}
+                </span>
+              }
+            </td>
+            <td>{{ num(f.peso) }} kg</td>
+            <td><button class="del" (click)="borrar(f.fecha)" aria-label="Borrar">×</button></td>
+          </tr>
+        }
+      </table>
+    } @else {
+      <p class="empty">Todavía no hay registros.</p>
+    }
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-h"><h3>Objetivos del informe</h3></div>
+  <div class="card-b">
+    @for (o of objetivos(); track o.t) {
+      <div class="item">
+        <div class="n"><b>{{ o.t }}</b><span class="nota">{{ o.d }}</span></div>
+      </div>
+    }
+  </div>
+</div>
+
+<div class="aviso">
+  El peso oscila a diario por líquidos, sal y ciclo digestivo. Mira la media de 7 días, no el dato
+  suelto. Pésate siempre en las mismas condiciones: en ayunas, después de ir al baño y sin ropa.
+</div>

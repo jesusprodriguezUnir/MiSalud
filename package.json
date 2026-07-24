@@ -1,0 +1,56 @@
+{
+  "name": "misalud",
+  "version": "0.0.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "dev": "ng serve",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:rules": "firebase emulators:exec --only firestore \"vitest run --config vitest.rules.config.ts\"",
+    "emulators": "firebase emulators:start",
+    "seed": "node scripts/seed.mjs",
+    "lint": "ng lint",
+    "format": "prettier --write \"src/**/*.{ts,html,scss}\"",
+    "deploy": "ng build && firebase deploy --only firestore:rules,hosting"
+  },
+  "prettier": {
+    "overrides": [
+      {
+        "files": "*.html",
+        "options": {
+          "parser": "angular"
+        }
+      }
+    ]
+  },
+  "private": true,
+  "dependencies": {
+    "@angular/common": "^20.0.0",
+    "@angular/compiler": "^20.0.0",
+    "@angular/core": "^20.0.0",
+    "@angular/fire": "^20.0.1",
+    "@angular/forms": "^20.0.0",
+    "@angular/platform-browser": "^20.0.0",
+    "@angular/platform-browser-dynamic": "^20.3.26",
+    "@angular/router": "^20.0.0",
+    "@angular/service-worker": "^20.0.0",
+    "firebase": "^12.16.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0",
+    "zone.js": "~0.15.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^20.0.4",
+    "@angular/cli": "^20.0.4",
+    "@angular/compiler-cli": "^20.0.0",
+    "@firebase/rules-unit-testing": "^5.0.1",
+    "firebase-admin": "^14.2.0",
+    "firebase-tools": "^14.27.0",
+    "prettier": "^3.9.6",
+    "typescript": "~5.8.2",
+    "vitest": "^3.2.7"
+  }
+}
