@@ -28,7 +28,8 @@ export class CompraPage {
 
   toggleDia(i: number): void {
     const s = new Set(this.seleccion());
-    s.has(i) ? s.delete(i) : s.add(i);
+    if (s.has(i)) s.delete(i);
+    else s.add(i);
     this.seleccion.set(s);
   }
 

@@ -25,6 +25,9 @@ jobs:
 
       - run: npm ci
 
+      - name: Lint
+        run: npm run lint
+
       - name: Tests de lógica pura
         run: npm test
 
