@@ -47,10 +47,13 @@
     "@angular/cli": "^20.0.4",
     "@angular/compiler-cli": "^20.0.0",
     "@firebase/rules-unit-testing": "^5.0.1",
+    "angular-eslint": "21.0.1",
+    "eslint": "^9.39.1",
     "firebase-admin": "^14.2.0",
     "firebase-tools": "^14.27.0",
     "prettier": "^3.9.6",
     "typescript": "~5.8.2",
+    "typescript-eslint": "8.46.4",
     "vitest": "^3.2.7"
   }
 }
