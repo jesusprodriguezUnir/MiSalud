@@ -7,6 +7,13 @@
 // Este objeto se usa como SEMILLA: en el primer arranque se escribe en
 // Firestore (usuarios/{uid}/plan/actual) y a partir de ahí manda el documento
 // remoto, para poder editarlo sin volver a desplegar.
+//
+// Los `fotoUrl` de las recetas apuntan a Wikimedia Commons (imágenes de stock
+// con licencia libre — CC0, CC BY y CC BY-SA — verificadas una a una). Son
+// ilustrativas, no fotos de los platos reales; la idea es sustituirlas por
+// fotos propias desde la pantalla Plan cuando las haya. Como el seed sólo se
+// aplica si `plan/actual` no existe, para meterlas en un plan ya sembrado hay
+// que ejecutar `node scripts/fotos.mjs <uid|email>`.
 // ---------------------------------------------------------------------------
 
 import type { DiaDieta, DiaEntreno, Habito, Item, Objetivo } from './plan.types';
@@ -59,6 +66,8 @@ export const DIETA: DiaDieta[] = [
                 'Preparar una vinagreta con el aceite de oliva, la pimienta molida y el vinagre.',
                 'Emplatar la ensalada y aliñar con la vinagreta.',
               ],
+              fotoUrl:
+                'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Pasta_salad_with_cherry_tomatoes.jpg/960px-Pasta_salad_with_cherry_tomatoes.jpg',
             },
           },
           { n: 'Sardinas en aceite', c: '69 g (1/2 lata)' },
@@ -96,6 +105,8 @@ export const DIETA: DiaDieta[] = [
                 'Dejar caer el huevo en el centro del remolino y cocinar 3 minutos. Retirar con espumadera: la clara queda sólida y la yema líquida.',
                 'Emplatar el salteado de verduras y colocar encima el huevo escalfado.',
               ],
+              fotoUrl:
+                'https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Eggs_Sardou.jpg/960px-Eggs_Sardou.jpg',
             },
           },
           { n: 'Almendra sin cáscara', c: '15 g (10 almendras)' },
@@ -133,6 +144,8 @@ export const DIETA: DiaDieta[] = [
                 'Saltear en una sartén caliente con el aceite la cebolla picada fina; cuando empiece a dorarse añadir el jamón en dados y rehogar 1 minuto.',
                 'Añadir las judías verdes escurridas y saltear el conjunto para que se integren los sabores.',
               ],
+              fotoUrl:
+                'https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Jud%C3%ADas_verdes_cocidas_salteadas_con_jam%C3%B3n_serrano.jpg/960px-Jud%C3%ADas_verdes_cocidas_salteadas_con_jam%C3%B3n_serrano.jpg',
             },
           },
           {
@@ -150,6 +163,8 @@ export const DIETA: DiaDieta[] = [
                 'Sazonar y, si se desea, espolvorear con perejil fresco picado.',
               ],
               nota: 'El rodaballo es un pescado blanco con muy poca grasa (3,6 g por 100 g de porción comestible).',
+              fotoUrl:
+                'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Rodaballo_a_la_plancha.jpg/960px-Rodaballo_a_la_plancha.jpg',
             },
           },
           { n: 'Ciruela', c: '75 g (1 unidad mediana)' },
@@ -199,6 +214,8 @@ export const DIETA: DiaDieta[] = [
                 'Mezclar en una fuente la patata escurrida con las hortalizas, el huevo cocido picado y el atún escurrido y desmenuzado.',
                 'Aliñar la ensalada con aceite y vinagre.',
               ],
+              fotoUrl:
+                'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Ensaladilla_Rusa_-_Patata_y_huevo.JPG/960px-Ensaladilla_Rusa_-_Patata_y_huevo.JPG',
             },
           },
           { n: 'Queso tipo Burgos con calcio', c: '40 g (1/2 tarrina)' },
@@ -229,6 +246,8 @@ export const DIETA: DiaDieta[] = [
                 'Lavar y trocear el tomate. Pelar la cebolla y cortar en juliana.',
                 'Emplatar la rúcula en la base y colocar encima los trozos de tomate mezclados con la cebolla. Aliñar con aceite de oliva.',
               ],
+              fotoUrl:
+                'https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Fresh_salad_with_arugula%2C_cabbage_and_tomato_in_a_glass_bowl.jpg/960px-Fresh_salad_with_arugula%2C_cabbage_and_tomato_in_a_glass_bowl.jpg',
             },
           },
           { n: 'Sardinas en aceite', c: '85 g (1 lata)' },
@@ -276,6 +295,8 @@ export const DIETA: DiaDieta[] = [
                 'Remover bien para que el aliño impregne homogéneamente todos los ingredientes.',
                 'Servir directamente o dejar unos minutos en la nevera para comer en frío.',
               ],
+              fotoUrl:
+                'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Colorful_healthy_Chickpea_Salad_-_49859083608.jpg/960px-Colorful_healthy_Chickpea_Salad_-_49859083608.jpg',
             },
           },
           { n: 'Queso tipo Burgos con calcio', c: '40 g (1/2 tarrina)' },
@@ -324,6 +345,8 @@ export const DIETA: DiaDieta[] = [
                 'Emplatar y añadir el aceite de oliva crudo por encima.',
               ],
               nota: 'Se puede dar un calentón al aceite en una sartén con unas láminas de ajo, retirar del fuego y añadir una cucharada de postre de pimentón dulce antes de servir.',
+              fotoUrl:
+                'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Fried_cauliflower_and_potatoes.jpg/960px-Fried_cauliflower_and_potatoes.jpg',
             },
           },
           {
@@ -342,6 +365,8 @@ export const DIETA: DiaDieta[] = [
                 'Pasados 20 minutos más, volver a dar la vuelta y asar 15 minutos.',
                 'Emplatar el muslo y aliñar generosamente con el jugo del fondo de la fuente.',
               ],
+              fotoUrl:
+                'https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Roast_Chicken_-_Kitchen_Cafe_2023-06-10.jpg/960px-Roast_Chicken_-_Kitchen_Cafe_2023-06-10.jpg',
             },
           },
           { n: 'Melón', c: '150 g (1 cortada fina)' },
@@ -363,6 +388,8 @@ export const DIETA: DiaDieta[] = [
                 'Cortar el calabacín y el tomate en rodajas.',
                 'Añadir a la parrilla la cantidad indicada de aceite y asar a fuego vivo las hortalizas.',
               ],
+              fotoUrl:
+                'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Grilled_zucchini.jpg/960px-Grilled_zucchini.jpg',
             },
           },
           {
@@ -381,6 +408,8 @@ export const DIETA: DiaDieta[] = [
                 'Retirar con espumadera: la clara queda sólida y la yema líquida.',
                 'Untar la rebanada de pan con el guacamole, colocar encima el salmón ahumado y por último el huevo poché.',
               ],
+              fotoUrl:
+                'https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Poached_With_Avo_and_Salmon_%286433842371%29.jpg/960px-Poached_With_Avo_and_Salmon_%286433842371%29.jpg',
             },
           },
           { n: 'Almendra sin cáscara', c: '15 g (10 almendras)' },
@@ -414,6 +443,8 @@ export const DIETA: DiaDieta[] = [
                 'Preparar la ensalada mezclando los brotes de espinacas con los tomates cherry. Aliñar con aceite de oliva y vinagre de Módena.',
                 'Emplatar la ensalada y colocar al lado la sepia asada. Espolvorear con semillas de sésamo.',
               ],
+              fotoUrl:
+                'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Spinach_bacon_salad_ingredients_cherry_tomatoes_feta_cheese_crumbles_almonds_nuts_fruit_vegetables_meat_%2828663817442%29.jpg/960px-Spinach_bacon_salad_ingredients_cherry_tomatoes_feta_cheese_crumbles_almonds_nuts_fruit_vegetables_meat_%2828663817442%29.jpg',
             },
           },
           { n: 'Pan integral de trigo', c: '35 g (1 rebanada de 3 dedos de grosor)' },
@@ -454,6 +485,8 @@ export const DIETA: DiaDieta[] = [
                 'Pochar en una sartén con el aceite sugerido la cebolla troceada; cuando empiece a dorarse añadir el jamón en dados y rehogar todo junto.',
                 'Añadir al salteado los guisantes reservados y mezclar durante unos minutos.',
               ],
+              fotoUrl:
+                'https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Guisantes_cocidos_salteados_con_jam%C3%B3n_serrano_%28Espa%C3%B1a%29.jpg/960px-Guisantes_cocidos_salteados_con_jam%C3%B3n_serrano_%28Espa%C3%B1a%29.jpg',
             },
           },
           {
@@ -472,6 +505,8 @@ export const DIETA: DiaDieta[] = [
                 'Batir el huevo junto con la clara y verter en la sartén sobre el salteado.',
                 'Cuajar la tortilla por ambos lados.',
               ],
+              fotoUrl:
+                'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Cider_menu_-_Codfish_omelette_001.jpg/960px-Cider_menu_-_Codfish_omelette_001.jpg',
             },
           },
           { n: 'Cereza', c: '75 g (8 unidades)' },

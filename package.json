@@ -12,6 +12,7 @@
     "test:rules": "firebase emulators:exec --only firestore \"vitest run --config vitest.rules.config.ts\"",
     "emulators": "firebase emulators:start",
     "seed": "node scripts/seed.mjs",
+    "fotos": "node scripts/fotos.mjs",
     "deploy:rules": "node scripts/deploy-rules.mjs",
     "lint": "ng lint",
     "format": "prettier --write \"src/**/*.{ts,html,scss}\"",

@@ -20,6 +20,7 @@ npm run test:watch    # vitest in watch mode
 npm run test:rules    # firestore.rules against the emulator (needs Java); firebase emulators:exec --only firestore "vitest run --config vitest.rules.config.ts"
 npm run emulators     # start Auth + Firestore emulators (needs Java)
 npm run seed <uid>    # seed a user's profile/plan (uses FIRESTORE_EMULATOR_HOST when run against emulators)
+npm run fotos <uid>   # backfill recipe photos (`receta.fotoUrl`) into an already-seeded plan; `--dry-run`, `--forzar`
 npm run format         # prettier --write on src/**/*.{ts,html,scss}
 npm run deploy         # ng build && firebase deploy --only firestore:rules,hosting
 npm run deploy:rules   # firestore.rules only, via the Firebase Rules API (see below)
@@ -84,6 +85,12 @@ screen) rather than redeployed. Two consequences worth keeping in mind:
 - Seeding only happens when the document does not exist *according to the server*
   (`!snapshot.metadata.fromCache`), and a plan with an unexpected `version` is left alone. Bumping
   `PLAN_VERSION` must never resow, or it would wipe the user's edits.
+- The same applies to anything added to the seed later: recipe photos (`receta.fotoUrl`, stock
+  images from Wikimedia Commons) live in `plan.seed.ts`, but an already-seeded plan will never
+  pick them up. `scripts/fotos.mjs` (`npm run fotos`) is the backfill: it reads the live plan,
+  matches dishes by name against the seed, fills in only the missing `fotoUrl`s and writes back
+  `dieta` + `actualizado` — never `version`. `--dry-run` previews; `--forzar` overwrites photos
+  the user set from the Plan screen (off by default).
 - All plan mutation lives in `src/app/domain/plan.edit.ts` as pure functions. `limpiar()` is the
   barrier before every write: it trims strings, drops `undefined` keys (the Firestore SDK throws on
   them) and discards rows the user added but never filled in.
