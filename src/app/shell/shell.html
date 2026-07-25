@@ -4,13 +4,31 @@
 
 <header>
   <div class="wrap hbar">
-    <button class="nav" (click)="nav.mover(-1)" aria-label="Día anterior">‹</button>
-    <div class="hdate">
-      <strong>{{ diaSemana() | titlecase }}</strong>
-      <span>{{ nav.fecha() | fechaLarga }}{{ nav.esHoy() ? ' · hoy' : '' }}</span>
+    <span class="brand">MiSalud</span>
+
+    <nav class="tabs-desktop">
+      <a routerLink="/hoy" routerLinkActive="on">Hoy</a>
+      <a routerLink="/semana" routerLinkActive="on">Semana</a>
+      <a routerLink="/peso" routerLinkActive="on">Peso</a>
+      <a routerLink="/compra" routerLinkActive="on">Compra</a>
+    </nav>
+
+    <div class="hbar-actions">
+      <button class="nav" (click)="nav.mover(-1)" aria-label="Día anterior">‹</button>
+      <div class="hdate">
+        <strong>{{ diaSemana() | titlecase }}</strong>
+        <span>{{ nav.fecha() | fechaLarga }}{{ nav.esHoy() ? ' · hoy' : '' }}</span>
+      </div>
+      <button class="nav" (click)="nav.mover(1)" aria-label="Día siguiente">›</button>
+      <button class="theme-toggle" (click)="theme.toggle()" [attr.aria-label]="temaLabel()" [title]="temaLabel()">
+        @if (theme.tema() === 'claro') {
+          <svg viewBox="0 0 24 24"><path d="M21 12.6A9 9 0 1 1 11.4 3a7 7 0 0 0 9.6 9.6Z" /></svg>
+        } @else {
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5" /><path d="M12 2v3M12 19v3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M2 12h3M19 12h3M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1" /></svg>
+        }
+      </button>
+      <button class="logout" (click)="logout()">Salir</button>
     </div>
-    <button class="nav" (click)="nav.mover(1)" aria-label="Día siguiente">›</button>
-    <button class="logout" (click)="logout()">Salir</button>
   </div>
 </header>
 

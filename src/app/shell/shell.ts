@@ -7,6 +7,7 @@ import { PesoService } from '../core/peso.service';
 import { DiaService } from '../core/dia.service';
 import { NavegacionService } from '../core/navegacion.service';
 import { ConectividadService } from '../core/conectividad.service';
+import { ThemeService } from '../core/theme.service';
 import { FechaLargaPipe } from '../shared/pipes/fecha-larga.pipe';
 
 // Marco de la app autenticada: cabecera con navegación de día, banda de "Sin
@@ -26,9 +27,13 @@ export class Shell {
   private readonly diaSvc = inject(DiaService);
   readonly nav = inject(NavegacionService);
   readonly conectividad = inject(ConectividadService);
+  readonly theme = inject(ThemeService);
 
   readonly diaSemana = computed(() =>
     this.nav.fecha().toLocaleDateString('es-ES', { weekday: 'long' }),
+  );
+  readonly temaLabel = computed(() =>
+    this.theme.tema() === 'claro' ? 'Modo oscuro' : 'Modo claro',
   );
 
   constructor() {

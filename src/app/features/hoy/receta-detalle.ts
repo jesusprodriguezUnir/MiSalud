@@ -1,14 +1,17 @@
 import { Component, ChangeDetectionStrategy, input } from '@angular/core';
 import type { Receta } from '../../domain/plan.types';
+import { FotoPlaceholder } from '../../shared/foto-placeholder';
 
 // Receta plegable dentro de una tarjeta de ingesta.
 @Component({
   selector: 'app-receta-detalle',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [FotoPlaceholder],
   template: `
     <details class="rec">
       <summary><span class="chev">›</span> Ver receta</summary>
       <div class="rec-body">
+        <app-foto-placeholder variante="plato" texto="Foto del plato" />
         <h4>Ingredientes (1 persona)</h4>
         <ul>
           @for (i of receta().ing; track i) {

@@ -1,5 +1,6 @@
-// Estilos del marco: cabecera pegajosa, banda offline y barra de pestañas.
-// Portados de legacy/public/index.html.
+// Estilos del marco: cabecera pegajosa, banda offline y navegación. En
+// mobile la navegación de pantallas vive en una barra inferior fija; en
+// escritorio (>=960px) se integra como subrayado en la cabecera superior.
 :host {
   display: block;
 }
@@ -10,7 +11,7 @@ header {
   z-index: 20;
   background: color-mix(in srgb, var(--bg) 88%, transparent);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--line);
+  border-bottom: 2px solid var(--line);
 }
 .hbar {
   display: flex;
@@ -18,15 +19,34 @@ header {
   gap: 8px;
   padding: 12px 0;
 }
+.brand {
+  display: none;
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  font-size: 15px;
+  letter-spacing: 0.02em;
+}
+.tabs-desktop {
+  display: none;
+}
+.hbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
 .hbar .nav {
   background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 9px;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
   width: 34px;
   height: 34px;
   display: grid;
   place-items: center;
   flex: 0 0 auto;
+  font-size: 18px;
+  color: var(--accent);
 }
 .hdate {
   flex: 1;
@@ -35,6 +55,8 @@ header {
 }
 .hdate strong {
   display: block;
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
   font-size: 16px;
   text-transform: capitalize;
 }
@@ -43,8 +65,28 @@ header {
   font-size: 12px;
   color: var(--muted);
 }
+.theme-toggle {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  background: none;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--text);
+}
+.theme-toggle svg {
+  width: 17px;
+  height: 17px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 .logout {
-  margin-left: auto;
+  flex: 0 0 auto;
   font-size: 12px;
   color: var(--muted);
   background: none;
@@ -60,7 +102,7 @@ nav.tabs {
   display: flex;
   background: color-mix(in srgb, var(--surface) 92%, transparent);
   backdrop-filter: blur(12px);
-  border-top: 1px solid var(--line);
+  border-top: 2px solid var(--line);
   padding-bottom: env(safe-area-inset-bottom);
 }
 nav.tabs a {
@@ -87,7 +129,7 @@ nav.tabs a svg {
 }
 nav.tabs a.on {
   color: var(--accent);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 main {
@@ -95,9 +137,52 @@ main {
 }
 
 .offline {
-  background: var(--warn-soft);
+  background: var(--surface);
   color: var(--warn);
+  border-bottom: 2px solid var(--line);
   font-size: 12px;
   text-align: center;
-  padding: 5px;
+  padding: 6px;
+}
+
+@media (min-width: 960px) {
+  .brand {
+    display: block;
+    margin-right: 24px;
+  }
+  .tabs-desktop {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex: 1;
+  }
+  .tabs-desktop a {
+    color: var(--muted);
+    text-decoration: none;
+    font-family: var(--font-heading);
+    font-weight: var(--font-heading-weight);
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    padding: 4px 0;
+    border-bottom: 2px solid transparent;
+  }
+  .tabs-desktop a.on {
+    color: var(--text);
+    border-bottom-color: var(--accent);
+  }
+  .hbar-actions {
+    flex: 0 0 auto;
+  }
+  .hdate {
+    text-align: right;
+    min-width: 140px;
+  }
+
+  nav.tabs {
+    display: none;
+  }
+  main {
+    padding: 28px 0 40px;
+  }
 }
