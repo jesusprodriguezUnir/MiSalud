@@ -4,6 +4,7 @@ import { TitleCasePipe } from '@angular/common';
 import { AuthService } from '../core/auth.service';
 import { PlanService } from '../core/plan.service';
 import { PesoService } from '../core/peso.service';
+import { DiaService } from '../core/dia.service';
 import { NavegacionService } from '../core/navegacion.service';
 import { ConectividadService } from '../core/conectividad.service';
 import { ThemeService } from '../core/theme.service';
@@ -24,6 +25,7 @@ export class Shell {
   private readonly auth = inject(AuthService);
   private readonly planSvc = inject(PlanService);
   private readonly pesoSvc = inject(PesoService);
+  private readonly diaSvc = inject(DiaService);
   readonly nav = inject(NavegacionService);
   readonly conectividad = inject(ConectividadService);
   readonly theme = inject(ThemeService);
@@ -59,6 +61,8 @@ export class Shell {
 
   logout(): void {
     this.pesoSvc.detener();
+    this.planSvc.detener();
+    this.diaSvc.detener();
     void this.auth.logout();
   }
 }

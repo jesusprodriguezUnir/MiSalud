@@ -112,6 +112,44 @@ describe('validación de perfil', () => {
   });
 });
 
+describe('validación del plan', () => {
+  const ref = () => doc(db(ANA), `usuarios/${ANA}/plan/actual`);
+  const plan = {
+    version: 1,
+    actualizado: '2026-06-03T10:00:00.000Z',
+    dieta: [{ dia: 'Lunes', ingestas: {} }],
+    entreno: [{ dia: 'Lunes', titulo: 'Fuerza', duracion: '45 min', tipo: 'fuerza', bloques: [] }],
+    habitos: [{ t: 'Andar', d: '30 min' }],
+    objetivos: [{ t: 'Bajar 10 kg', d: 'En seis meses' }],
+  };
+
+  it('acepta un plan editado desde la app', async () => {
+    await assertSucceeds(setDoc(ref(), plan));
+  });
+
+  it('acepta un plan sin la marca de actualizado', async () => {
+    const { actualizado: _sinMarca, ...resto } = plan;
+    await assertSucceeds(setDoc(ref(), resto));
+  });
+
+  it('rechaza un plan al que le falta una sección', async () => {
+    const { objetivos: _sinObjetivos, ...incompleto } = plan;
+    await assertFails(setDoc(ref(), incompleto));
+  });
+
+  it('rechaza una sección que no es una lista', async () => {
+    await assertFails(setDoc(ref(), { ...plan, dieta: { lunes: {} } }));
+  });
+
+  it('rechaza una clave que la app no escribe', async () => {
+    await assertFails(setDoc(ref(), { ...plan, notas: 'algo' }));
+  });
+
+  it('rechaza una versión que no es un número', async () => {
+    await assertFails(setDoc(ref(), { ...plan, version: '1' }));
+  });
+});
+
 describe('días', () => {
   it('acepta un estado de día con id de fecha correcto', async () => {
     await assertSucceeds(

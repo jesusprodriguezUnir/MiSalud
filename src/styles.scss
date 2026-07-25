@@ -178,6 +178,39 @@ input:focus-visible {
   outline-offset: 2px;
   border-bottom-color: var(--accent);
 }
+// El editor del plan necesita texto largo (ingredientes, pasos, ejercicios) y
+// listas cerradas (tipo de entrenamiento). Misma línea de 2px que los inputs,
+// pero el textarea sí lleva caja: sin ella no se distingue dónde acaba un
+// bloque de varias líneas.
+textarea {
+  width: 100%;
+  padding: 9px 10px;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  line-height: 1.45;
+  resize: vertical;
+  margin-bottom: 10px;
+}
+textarea:focus-visible {
+  border-color: var(--accent);
+}
+select {
+  width: 100%;
+  padding: 9px 0;
+  border: 0;
+  border-bottom: 2px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  margin-bottom: 10px;
+}
+select:focus-visible {
+  border-bottom-color: var(--accent);
+}
 .input-lg {
   border: 0 !important;
   border-bottom: 2px solid var(--line) !important;

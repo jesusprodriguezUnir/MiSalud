@@ -1,0 +1,87 @@
+// Editor del plan. Reutiliza .seccion / .campo / .pill del sistema global; aquí
+// solo vive lo propio de la edición: la fila de acciones de cada elemento, el
+// bloque plegado de receta y la barra de guardado fija.
+
+.plan-tabs {
+  margin-bottom: 10px;
+}
+.plan-dias {
+  padding-top: 4px;
+}
+
+// Un elemento editable (alimento, bloque, hábito, objetivo). Se separa del
+// anterior con la regla fina de 1px que el sistema usa para filas dentro de un
+// bloque, no con una caja.
+.edit-item {
+  border-top: 1px solid var(--line);
+  padding: 10px 0 4px;
+}
+.edit-item:first-of-type {
+  border-top: 0;
+}
+.edit-item-h {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.edit-acciones {
+  display: flex;
+  gap: 2px;
+}
+.edit-acciones .del:disabled {
+  opacity: 0.3;
+}
+
+// La receta se sangra para que se lea como parte del alimento y no como otro.
+.edit-receta {
+  border-left: 2px solid var(--line);
+  padding-left: 12px;
+  margin: 6px 0 4px;
+}
+
+.campo-hora {
+  max-width: 140px;
+}
+
+.check-linea {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0 2px;
+  font-size: 14px;
+}
+.check-linea input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  margin: 0;
+}
+
+// Barra de guardado: pegada al fondo, por encima de la barra de pestañas del
+// shell en móvil, para no obligar a subir después de editar un día entero.
+.plan-barra {
+  position: sticky;
+  // En móvil la barra de pestañas del shell ocupa los 72px de abajo (el mismo
+  // hueco que reserva el padding del body), así que la barra se apoya encima.
+  bottom: calc(72px + env(safe-area-inset-bottom));
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  margin-top: 8px;
+  background: var(--bg);
+  border-top: 2px solid var(--line);
+}
+.plan-estado {
+  flex: 1;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+@media (min-width: 960px) {
+  // En escritorio no hay barra de pestañas inferior.
+  .plan-barra {
+    bottom: 0;
+  }
+}

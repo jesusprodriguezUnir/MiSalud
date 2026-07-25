@@ -1,15 +1,26 @@
-import { Injectable, inject, signal } from '@angular/core';
-import { Firestore, doc, getDoc, setDoc } from '@angular/fire/firestore';
+import { Injectable, inject, signal, DestroyRef } from '@angular/core';
+import { Firestore, doc, setDoc, onSnapshot, Unsubscribe } from '@angular/fire/firestore';
 import { AuthService } from './auth.service';
 import { AvisoService } from './aviso.service';
 import { PERFIL_DEFECTO } from '../../environments/environment';
 import { DIETA, ENTRENO, HABITOS, OBJETIVOS, PLAN_VERSION } from '../domain/plan.seed';
 import type { Perfil, Plan } from '../domain/plan.types';
 
-// Carga y siembra del plan y el perfil. Replica el arranque de la app vanilla:
-// si el documento remoto no existe (o el plan tiene otra versión) se siembra con
-// los datos del código; a partir de ahí manda Firestore, de modo que se pueda
-// editar el plan sin volver a desplegar.
+// Carga, siembra y edición del plan y el perfil.
+//
+// Ambos documentos se siguen con `onSnapshot`, no con una lectura única: el plan
+// ahora se edita desde la propia app (pantalla Plan), así que un cambio hecho en
+// el móvil tiene que aparecer en el portátil sin recargar. Es el mismo modelo
+// que ya usaba PesoService.
+//
+// La siembra solo ocurre cuando el documento NO existe *según el servidor*. Dos
+// matices que importan:
+//   · Nunca se siembra a partir de un snapshot que viene de la caché local
+//     (`fromCache`): estando sin cobertura, un "no existe" de la caché haría que
+//     `setDoc` pisara el plan real que sí hay en Firestore.
+//   · Un plan existente con otra `version` se respeta tal cual. Antes se
+//     resembraba, lo que hoy borraría todas las ediciones del usuario cada vez
+//     que se tocara PLAN_VERSION en el código.
 @Injectable({ providedIn: 'root' })
 export class PlanService {
   private readonly db = inject(Firestore);
@@ -21,14 +32,28 @@ export class PlanService {
    * como si fuera el dato remoto. */
   readonly cargando = signal(true);
 
-  readonly plan = signal<Plan>({
-    version: PLAN_VERSION,
-    dieta: DIETA,
-    entreno: ENTRENO,
-    habitos: HABITOS,
-    objetivos: OBJETIVOS,
-  });
+  /** True mientras hay una escritura del plan en vuelo (lo usa el editor). */
+  readonly guardando = signal(false);
+
+  readonly plan = signal<Plan>(this.semilla());
   readonly perfil = signal<Perfil>({ ...PERFIL_DEFECTO });
+
+  private unsubPerfil: Unsubscribe | null = null;
+  private unsubPlan: Unsubscribe | null = null;
+
+  constructor() {
+    inject(DestroyRef).onDestroy(() => this.detener());
+  }
+
+  private semilla(): Plan {
+    return {
+      version: PLAN_VERSION,
+      dieta: DIETA,
+      entreno: ENTRENO,
+      habitos: HABITOS,
+      objetivos: OBJETIVOS,
+    };
+  }
 
   private uid(): string {
     const uid = this.auth.uid;
@@ -43,15 +68,95 @@ export class PlanService {
     return doc(this.db, 'usuarios', this.uid(), 'plan', 'actual');
   }
 
-  /** Carga perfil y plan, sembrando lo que falte. Se llama tras el login. */
+  /**
+   * Abre los streams de perfil y plan y resuelve con el primer snapshot de cada
+   * uno (venga del servidor o de la caché), para que el shell pueda dejar de
+   * pintar el esqueleto. Los streams siguen vivos después.
+   */
   async cargar(): Promise<void> {
     this.cargando.set(true);
     try {
-      await this.cargarPerfil();
-      await this.cargarPlan();
+      await Promise.all([this.escucharPerfil(), this.escucharPlan()]);
     } finally {
       this.cargando.set(false);
     }
+  }
+
+  detener(): void {
+    this.unsubPerfil?.();
+    this.unsubPlan?.();
+    this.unsubPerfil = null;
+    this.unsubPlan = null;
+  }
+
+  private escucharPerfil(): Promise<void> {
+    this.unsubPerfil?.();
+    return new Promise<void>((resolver) => {
+      let primero = true;
+      const listo = () => {
+        if (primero) {
+          primero = false;
+          resolver();
+        }
+      };
+      this.unsubPerfil = onSnapshot(
+        this.refPerfil(),
+        (snap) => {
+          if (snap.exists()) {
+            this.perfil.set({ ...PERFIL_DEFECTO, ...(snap.data() as Partial<Perfil>) });
+          } else if (!snap.metadata.fromCache) {
+            void setDoc(this.refPerfil(), this.perfil()).catch((e) =>
+              console.warn('sembrar perfil', e),
+            );
+          }
+          listo();
+        },
+        (e) => {
+          console.warn('perfil', e);
+          this.avisos.mostrar('No se ha podido cargar tu perfil.');
+          listo();
+        },
+      );
+    });
+  }
+
+  private escucharPlan(): Promise<void> {
+    this.unsubPlan?.();
+    return new Promise<void>((resolver) => {
+      let primero = true;
+      const listo = () => {
+        if (primero) {
+          primero = false;
+          resolver();
+        }
+      };
+      this.unsubPlan = onSnapshot(
+        this.refPlan(),
+        (snap) => {
+          const data = snap.data() as Plan | undefined;
+          if (snap.exists() && data) {
+            this.plan.set({
+              version: data.version ?? PLAN_VERSION,
+              actualizado: data.actualizado,
+              dieta: data.dieta ?? [],
+              entreno: data.entreno ?? [],
+              habitos: data.habitos ?? [],
+              objetivos: data.objetivos ?? [],
+            });
+          } else if (!snap.metadata.fromCache) {
+            const semilla: Plan = { ...this.semilla(), actualizado: new Date().toISOString() };
+            this.plan.set(semilla);
+            void setDoc(this.refPlan(), semilla).catch((e) => console.warn('sembrar plan', e));
+          }
+          listo();
+        },
+        (e) => {
+          console.warn('plan', e);
+          this.avisos.mostrar('No se ha podido cargar el plan.');
+          listo();
+        },
+      );
+    });
   }
 
   /**
@@ -65,47 +170,24 @@ export class PlanService {
     this.perfil.set(datos);
   }
 
-  private async cargarPerfil(): Promise<void> {
+  /**
+   * Persiste el plan completo desde el editor. Escribe el documento entero
+   * porque el editor siempre trabaja sobre una copia completa del plan; un
+   * merge dejaría elementos borrados de los arrays a medio quitar.
+   *
+   * Actualiza el signal antes de esperar a la escritura: sin cobertura la
+   * promesa queda pendiente (Firestore la encola en la caché persistente) y la
+   * pantalla no debe quedarse colgada mostrando el plan viejo. Si la escritura
+   * falla de verdad, el `onSnapshot` acabará devolviendo el estado real.
+   */
+  async actualizarPlan(plan: Plan): Promise<void> {
+    const completo: Plan = { ...plan, actualizado: new Date().toISOString() };
+    this.guardando.set(true);
+    this.plan.set(completo);
     try {
-      const snap = await getDoc(this.refPerfil());
-      if (snap.exists()) {
-        this.perfil.set({ ...PERFIL_DEFECTO, ...(snap.data() as Partial<Perfil>) });
-      } else {
-        await setDoc(this.refPerfil(), this.perfil());
-      }
-    } catch (e) {
-      console.warn('perfil', e);
-      this.avisos.mostrar('No se ha podido cargar tu perfil.');
-    }
-  }
-
-  private async cargarPlan(): Promise<void> {
-    try {
-      const snap = await getDoc(this.refPlan());
-      const data = snap.data() as Plan | undefined;
-      if (snap.exists() && data?.version === PLAN_VERSION) {
-        this.plan.set({
-          version: data.version,
-          dieta: data.dieta,
-          entreno: data.entreno,
-          habitos: data.habitos,
-          objetivos: data.objetivos,
-        });
-      } else {
-        const semilla: Plan = {
-          version: PLAN_VERSION,
-          actualizado: new Date().toISOString(),
-          dieta: DIETA,
-          entreno: ENTRENO,
-          habitos: HABITOS,
-          objetivos: OBJETIVOS,
-        };
-        await setDoc(this.refPlan(), semilla);
-        this.plan.set(semilla);
-      }
-    } catch (e) {
-      console.warn('plan', e);
-      this.avisos.mostrar('No se ha podido cargar el plan.');
+      await setDoc(this.refPlan(), completo);
+    } finally {
+      this.guardando.set(false);
     }
   }
 }

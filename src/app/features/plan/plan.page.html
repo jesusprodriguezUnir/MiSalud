@@ -1,0 +1,482 @@
+@let d = dia();
+@let ent = entreno();
+
+<section class="seccion">
+  <h2 class="seccion-tit">
+    Editar plan
+    @if (sucio()) {
+      <span class="aparte">Cambios sin guardar</span>
+    }
+  </h2>
+
+  <div class="compra-dias plan-tabs" role="tablist" aria-label="Parte del plan">
+    <button
+      class="pill"
+      role="tab"
+      [class.on]="pestana() === 'dieta'"
+      [attr.aria-selected]="pestana() === 'dieta'"
+      (click)="pestana.set('dieta')"
+    >
+      Dieta
+    </button>
+    <button
+      class="pill"
+      role="tab"
+      [class.on]="pestana() === 'entreno'"
+      [attr.aria-selected]="pestana() === 'entreno'"
+      (click)="pestana.set('entreno')"
+    >
+      Entreno
+    </button>
+    <button
+      class="pill"
+      role="tab"
+      [class.on]="pestana() === 'habitos'"
+      [attr.aria-selected]="pestana() === 'habitos'"
+      (click)="pestana.set('habitos')"
+    >
+      Hábitos
+    </button>
+    <button
+      class="pill"
+      role="tab"
+      [class.on]="pestana() === 'objetivos'"
+      [attr.aria-selected]="pestana() === 'objetivos'"
+      (click)="pestana.set('objetivos')"
+    >
+      Objetivos
+    </button>
+  </div>
+
+  @if (pestana() === 'dieta' || pestana() === 'entreno') {
+    <div class="compra-dias plan-dias">
+      @for (nombre of nombreDia; track nombre) {
+        <button class="pill" [class.on]="diaSel() === $index" (click)="diaSel.set($index)">
+          {{ nombre }}
+        </button>
+      }
+    </div>
+  }
+</section>
+
+<!-- ------------------------------------------------------------------ dieta -->
+@if (pestana() === 'dieta') {
+  <section class="seccion">
+    <h2 class="seccion-tit">{{ d.dia }} · comidas</h2>
+
+    <div class="campo">
+      <label class="kicker" [for]="'foto-dia'">Foto del día (URL, opcional)</label>
+      <input
+        id="foto-dia"
+        type="text"
+        inputmode="url"
+        placeholder="https://…"
+        [ngModel]="d.fotoUrl ?? ''"
+        (ngModelChange)="setFotoDia($event)"
+      />
+    </div>
+
+    <label class="check-linea">
+      <input type="checkbox" [checked]="!!d.entrenoFuerte" (change)="toggleEntrenoFuerte()" />
+      <span>Día de entrenamiento fuerte</span>
+    </label>
+  </section>
+
+  @for (row of ingestas(); track row.key) {
+    <section class="seccion">
+      <h2 class="seccion-tit">
+        {{ nombreIngesta[row.key] }}
+        @if (row.ingesta) {
+          <button
+            class="del"
+            (click)="quitarIngesta(row.key)"
+            [attr.aria-label]="'Quitar ' + nombreIngesta[row.key]"
+          >
+            ✕
+          </button>
+        }
+      </h2>
+
+      @if (!row.ingesta) {
+        <p class="empty">Este día no tiene {{ nombreIngesta[row.key].toLowerCase() }}.</p>
+        <button class="btn ghost mini" (click)="anadirIngesta(row.key)">
+          Añadir {{ nombreIngesta[row.key].toLowerCase() }}
+        </button>
+      } @else {
+        <div class="campo campo-hora">
+          <label class="kicker" [for]="'hora-' + row.key">Hora</label>
+          <input
+            [id]="'hora-' + row.key"
+            type="text"
+            inputmode="numeric"
+            placeholder="14:00"
+            [ngModel]="row.ingesta.hora"
+            (ngModelChange)="setHora(row.key, $event)"
+          />
+        </div>
+
+        @for (it of row.ingesta.items; track $index) {
+          <div class="edit-item">
+            <div class="edit-item-h">
+              <span class="kicker">Alimento {{ $index + 1 }}</span>
+              <div class="edit-acciones">
+                <button
+                  class="del"
+                  (click)="moverItem(row.key, $index, -1)"
+                  [disabled]="$first"
+                  aria-label="Subir"
+                >
+                  ↑
+                </button>
+                <button
+                  class="del"
+                  (click)="moverItem(row.key, $index, 1)"
+                  [disabled]="$last"
+                  aria-label="Bajar"
+                >
+                  ↓
+                </button>
+                <button class="del" (click)="borrarItem(row.key, $index)" aria-label="Borrar">
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            <div class="campo-fila">
+              <div class="campo">
+                <label class="kicker" [for]="row.key + '-n-' + $index">Nombre</label>
+                <input
+                  [id]="row.key + '-n-' + $index"
+                  type="text"
+                  [ngModel]="it.n"
+                  (ngModelChange)="setItem(row.key, $index, { n: $event })"
+                />
+              </div>
+              @if (!it.receta) {
+                <div class="campo">
+                  <label class="kicker" [for]="row.key + '-c-' + $index">Cantidad</label>
+                  <input
+                    [id]="row.key + '-c-' + $index"
+                    type="text"
+                    placeholder="40 g (1 vaso)"
+                    [ngModel]="it.c ?? ''"
+                    (ngModelChange)="setItem(row.key, $index, { c: $event })"
+                  />
+                </div>
+              }
+            </div>
+
+            <div class="campo">
+              <label class="kicker" [for]="row.key + '-nota-' + $index">Nota (opcional)</label>
+              <input
+                [id]="row.key + '-nota-' + $index"
+                type="text"
+                [ngModel]="it.nota ?? ''"
+                (ngModelChange)="setItem(row.key, $index, { nota: $event })"
+              />
+            </div>
+
+            <label class="check-linea">
+              <input
+                type="checkbox"
+                [checked]="!!it.receta"
+                (change)="toggleReceta(row.key, $index)"
+              />
+              <span>Tiene receta</span>
+            </label>
+
+            @if (it.receta) {
+              <div class="edit-receta">
+                <div class="campo">
+                  <label class="kicker" [for]="row.key + '-ing-' + $index">
+                    Ingredientes (uno por línea)
+                  </label>
+                  <textarea
+                    [id]="row.key + '-ing-' + $index"
+                    rows="5"
+                    placeholder="Tomate crudo: 45 g (3 rodajas)"
+                    [ngModel]="texto(it.receta.ing)"
+                    (ngModelChange)="setIngredientes(row.key, $index, $event)"
+                  ></textarea>
+                </div>
+                <div class="campo">
+                  <label class="kicker" [for]="row.key + '-pasos-' + $index">
+                    Elaboración (un paso por línea)
+                  </label>
+                  <textarea
+                    [id]="row.key + '-pasos-' + $index"
+                    rows="5"
+                    [ngModel]="texto(it.receta.pasos)"
+                    (ngModelChange)="setPasos(row.key, $index, $event)"
+                  ></textarea>
+                </div>
+                <div class="campo">
+                  <label class="kicker" [for]="row.key + '-rnota-' + $index"
+                    >Nota de la receta</label
+                  >
+                  <input
+                    [id]="row.key + '-rnota-' + $index"
+                    type="text"
+                    [ngModel]="it.receta.nota ?? ''"
+                    (ngModelChange)="setNotaReceta(row.key, $index, $event)"
+                  />
+                </div>
+                <div class="campo">
+                  <label class="kicker" [for]="row.key + '-rfoto-' + $index">Foto (URL)</label>
+                  <input
+                    [id]="row.key + '-rfoto-' + $index"
+                    type="text"
+                    inputmode="url"
+                    placeholder="https://…"
+                    [ngModel]="it.receta.fotoUrl ?? ''"
+                    (ngModelChange)="setFotoReceta(row.key, $index, $event)"
+                  />
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <button class="btn ghost mini" (click)="anadirItem(row.key)">Añadir alimento</button>
+      }
+    </section>
+  }
+}
+
+<!-- ---------------------------------------------------------------- entreno -->
+@if (pestana() === 'entreno') {
+  <section class="seccion">
+    <h2 class="seccion-tit">{{ ent.dia }} · entrenamiento</h2>
+
+    <div class="campo">
+      <label class="kicker" for="ent-titulo">Título</label>
+      <input
+        id="ent-titulo"
+        type="text"
+        [ngModel]="ent.titulo"
+        (ngModelChange)="setEntreno({ titulo: $event })"
+      />
+    </div>
+
+    <div class="campo-fila">
+      <div class="campo">
+        <label class="kicker" for="ent-duracion">Duración</label>
+        <input
+          id="ent-duracion"
+          type="text"
+          placeholder="45 min"
+          [ngModel]="ent.duracion"
+          (ngModelChange)="setEntreno({ duracion: $event })"
+        />
+      </div>
+      <div class="campo">
+        <label class="kicker" for="ent-tipo">Tipo</label>
+        <select id="ent-tipo" [ngModel]="ent.tipo" (ngModelChange)="setEntreno({ tipo: $event })">
+          @for (t of tipos; track t) {
+            <option [value]="t">{{ t }}</option>
+          }
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion">
+    <h2 class="seccion-tit">Bloques</h2>
+
+    @for (b of ent.bloques; track $index) {
+      <div class="edit-item">
+        <div class="edit-item-h">
+          <span class="kicker">Bloque {{ $index + 1 }}</span>
+          <div class="edit-acciones">
+            <button
+              class="del"
+              (click)="moverBloque($index, -1)"
+              [disabled]="$first"
+              aria-label="Subir"
+            >
+              ↑
+            </button>
+            <button
+              class="del"
+              (click)="moverBloque($index, 1)"
+              [disabled]="$last"
+              aria-label="Bajar"
+            >
+              ↓
+            </button>
+            <button class="del" (click)="borrarBloque($index)" aria-label="Borrar">✕</button>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label class="kicker" [for]="'bloque-t-' + $index">Título del bloque</label>
+          <input
+            [id]="'bloque-t-' + $index"
+            type="text"
+            placeholder="Calentamiento"
+            [ngModel]="b.t"
+            (ngModelChange)="setTituloBloque($index, $event)"
+          />
+        </div>
+        <div class="campo">
+          <label class="kicker" [for]="'bloque-e-' + $index">Ejercicios (uno por línea)</label>
+          <textarea
+            [id]="'bloque-e-' + $index"
+            rows="5"
+            [ngModel]="texto(b.e)"
+            (ngModelChange)="setEjercicios($index, $event)"
+          ></textarea>
+        </div>
+      </div>
+    } @empty {
+      <p class="empty">Este día no tiene bloques de entrenamiento.</p>
+    }
+
+    <button class="btn ghost mini" (click)="anadirBloque()">Añadir bloque</button>
+  </section>
+
+  <section class="seccion">
+    <h2 class="seccion-tit">Claves</h2>
+    <div class="campo">
+      <label class="kicker" for="ent-claves">Una por línea</label>
+      <textarea
+        id="ent-claves"
+        rows="4"
+        [ngModel]="texto(ent.claves)"
+        (ngModelChange)="setClaves($event)"
+      ></textarea>
+    </div>
+  </section>
+}
+
+<!-- ---------------------------------------------------------------- hábitos -->
+@if (pestana() === 'habitos') {
+  <section class="seccion">
+    <h2 class="seccion-tit">Hábitos diarios</h2>
+
+    @for (h of habitos(); track $index) {
+      <div class="edit-item">
+        <div class="edit-item-h">
+          <span class="kicker">Hábito {{ $index + 1 }}</span>
+          <div class="edit-acciones">
+            <button
+              class="del"
+              (click)="moverHabito($index, -1)"
+              [disabled]="$first"
+              aria-label="Subir"
+            >
+              ↑
+            </button>
+            <button
+              class="del"
+              (click)="moverHabito($index, 1)"
+              [disabled]="$last"
+              aria-label="Bajar"
+            >
+              ↓
+            </button>
+            <button class="del" (click)="borrarHabito($index)" aria-label="Borrar">✕</button>
+          </div>
+        </div>
+        <div class="campo">
+          <label class="kicker" [for]="'hab-t-' + $index">Título</label>
+          <input
+            [id]="'hab-t-' + $index"
+            type="text"
+            [ngModel]="h.t"
+            (ngModelChange)="setHabito($index, { t: $event })"
+          />
+        </div>
+        <div class="campo">
+          <label class="kicker" [for]="'hab-d-' + $index">Descripción</label>
+          <textarea
+            [id]="'hab-d-' + $index"
+            rows="2"
+            [ngModel]="h.d"
+            (ngModelChange)="setHabito($index, { d: $event })"
+          ></textarea>
+        </div>
+      </div>
+    } @empty {
+      <p class="empty">Todavía no hay hábitos.</p>
+    }
+
+    <button class="btn ghost mini" (click)="anadirHabito()">Añadir hábito</button>
+  </section>
+}
+
+<!-- -------------------------------------------------------------- objetivos -->
+@if (pestana() === 'objetivos') {
+  <section class="seccion">
+    <h2 class="seccion-tit">Objetivos</h2>
+
+    @for (o of objetivos(); track $index) {
+      <div class="edit-item">
+        <div class="edit-item-h">
+          <span class="kicker">Objetivo {{ $index + 1 }}</span>
+          <div class="edit-acciones">
+            <button
+              class="del"
+              (click)="moverObjetivo($index, -1)"
+              [disabled]="$first"
+              aria-label="Subir"
+            >
+              ↑
+            </button>
+            <button
+              class="del"
+              (click)="moverObjetivo($index, 1)"
+              [disabled]="$last"
+              aria-label="Bajar"
+            >
+              ↓
+            </button>
+            <button class="del" (click)="borrarObjetivo($index)" aria-label="Borrar">✕</button>
+          </div>
+        </div>
+        <div class="campo">
+          <label class="kicker" [for]="'obj-t-' + $index">Título</label>
+          <input
+            [id]="'obj-t-' + $index"
+            type="text"
+            [ngModel]="o.t"
+            (ngModelChange)="setObjetivo($index, { t: $event })"
+          />
+        </div>
+        <div class="campo">
+          <label class="kicker" [for]="'obj-d-' + $index">Descripción</label>
+          <textarea
+            [id]="'obj-d-' + $index"
+            rows="2"
+            [ngModel]="o.d"
+            (ngModelChange)="setObjetivo($index, { d: $event })"
+          ></textarea>
+        </div>
+      </div>
+    } @empty {
+      <p class="empty">Todavía no hay objetivos.</p>
+    }
+
+    <button class="btn ghost mini" (click)="anadirObjetivo()">Añadir objetivo</button>
+  </section>
+}
+
+<div class="err">{{ error() }}</div>
+
+<!-- Barra de guardado: fija abajo para no tener que subir tras editar un día. -->
+<div class="plan-barra">
+  <span class="plan-estado">
+    {{ sucio() ? 'Cambios sin guardar' : 'Todo guardado' }}
+  </span>
+  <button class="btn ghost mini" (click)="descartar()" [disabled]="guardando() || !sucio()">
+    Descartar
+  </button>
+  <button class="btn mini" (click)="guardar()" [disabled]="guardando() || !sucio()">
+    {{ guardando() ? 'Guardando…' : 'Guardar plan' }}
+  </button>
+</div>
+
+<div class="aviso">
+  Los cambios se guardan en tu plan de Firestore y se ven al instante en Hoy, Semana y la lista de
+  la compra. Sin conexión se guardan en el dispositivo y suben solos al recuperar la cobertura.
+</div>

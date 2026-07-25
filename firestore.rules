@@ -16,9 +16,25 @@ service cloud.firestore {
                           ['nombre','alturaCm','pesoInicial','fechaInicio','objetivo']);
       }
 
-      // plan/actual — el plan dietético y de entrenamiento
+      // plan/actual — el plan dietético y de entrenamiento.
+      // Desde que el plan se edita dentro de la app (pantalla Plan) y no solo
+      // desde la consola de Firestore, la forma del documento se valida aquí:
+      // no se puede validar el contenido de las listas (las reglas no iteran),
+      // pero sí que estén y que sean listas, que es lo que la app da por hecho
+      // al pintar dieta[i] / entreno[i].
       match /plan/{docId} {
-        allow read, write: if request.auth != null && request.auth.uid == uid;
+        allow read: if request.auth != null && request.auth.uid == uid;
+        allow write: if request.auth != null && request.auth.uid == uid
+                     && request.resource.data.keys().hasOnly(
+                          ['version','actualizado','dieta','entreno','habitos','objetivos'])
+                     && request.resource.data.keys().hasAll(
+                          ['version','dieta','entreno','habitos','objetivos'])
+                     && request.resource.data.version is number
+                     && request.resource.data.dieta is list
+                     && request.resource.data.entreno is list
+                     && request.resource.data.habitos is list
+                     && request.resource.data.objetivos is list;
+        allow delete: if request.auth != null && request.auth.uid == uid;
       }
 
       // pesos/{yyyy-mm-dd}

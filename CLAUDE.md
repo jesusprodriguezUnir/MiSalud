@@ -22,7 +22,15 @@ npm run emulators     # start Auth + Firestore emulators (needs Java)
 npm run seed <uid>    # seed a user's profile/plan (uses FIRESTORE_EMULATOR_HOST when run against emulators)
 npm run format         # prettier --write on src/**/*.{ts,html,scss}
 npm run deploy         # ng build && firebase deploy --only firestore:rules,hosting
+npm run deploy:rules   # firestore.rules only, via the Firebase Rules API (see below)
 ```
+
+`deploy:rules` exists because `firebase deploy` first checks that the Firestore API is enabled,
+which needs `serviceusage.services.get` — a permission the Firebase Admin service account does not
+have. The script (`scripts/deploy-rules.mjs`) publishes the ruleset straight through the
+firebaserules API, which the same credentials *can* do. Deploying the rules is not optional: the
+project shipped for a while with a deny-all ruleset live, so Auth worked and every read/write to
+Firestore failed silently.
 
 To run a single test file: `npx vitest run src/app/domain/peso.calc.spec.ts`.
 
@@ -43,9 +51,9 @@ Standalone components + signals throughout, no NgRx — state lives in `provided
 ```
 src/app/
   core/       auth · plan · dia · peso · conectividad · navegacion — signal-based services + firebase.providers.ts
-  domain/     types (plan.types.ts), the plan seed (plan.seed.ts), and pure calc logic + its specs
+  domain/     types (plan.types.ts), the plan seed (plan.seed.ts), and pure calc/edit logic + specs
   shell/      header, offline banner, tab bar
-  features/   login · hoy · semana · peso · compra — lazy routes
+  features/   login · hoy · semana · peso · compra · plan · ajustes — lazy routes
   shared/     reusable pipes
 ```
 
@@ -70,8 +78,18 @@ Types describing this model live in `src/app/domain/plan.types.ts` and must stay
 `firestore.rules`.
 
 The plan (diet + training) is seeded from `src/app/domain/plan.seed.ts` into
-`usuarios/{uid}/plan/actual` on first run, but is meant to be edited directly in Firestore
-afterward rather than redeployed.
+`usuarios/{uid}/plan/actual` on first run, and from then on is edited **in the app** (the Plan
+screen) rather than redeployed. Two consequences worth keeping in mind:
+
+- Seeding only happens when the document does not exist *according to the server*
+  (`!snapshot.metadata.fromCache`), and a plan with an unexpected `version` is left alone. Bumping
+  `PLAN_VERSION` must never resow, or it would wipe the user's edits.
+- All plan mutation lives in `src/app/domain/plan.edit.ts` as pure functions. `limpiar()` is the
+  barrier before every write: it trims strings, drops `undefined` keys (the Firestore SDK throws on
+  them) and discards rows the user added but never filled in.
+
+Perfil, plan and the visible day are all followed with `onSnapshot`, not one-off `getDoc`s, so an
+edit made on the phone shows up on the laptop without a reload.
 
 ### Security model
 
