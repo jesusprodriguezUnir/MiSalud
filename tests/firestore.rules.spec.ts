@@ -89,7 +89,7 @@ describe('validación de perfil', () => {
   it('acepta el perfil con exactamente las claves permitidas', async () => {
     await assertSucceeds(
       setDoc(ref(), {
-        nombre: 'Ana',
+        nombre: 'Jesús',
         alturaCm: 158.5,
         pesoInicial: 66.5,
         fechaInicio: '2026-06-03',
@@ -101,12 +101,12 @@ describe('validación de perfil', () => {
   it('rechaza el perfil con una clave extra', async () => {
     await assertFails(
       setDoc(ref(), {
-        nombre: 'Ana',
+        nombre: 'Jesús',
         alturaCm: 158.5,
         pesoInicial: 66.5,
         fechaInicio: '2026-06-03',
         objetivo: 60,
-        email: 'ana@example.com',
+        email: 'jesus@example.com',
       }),
     );
   });

@@ -18,9 +18,9 @@ export const environment = {
 };
 
 export const PERFIL_DEFECTO: Perfil = {
-  nombre: 'Ana',
-  alturaCm: 158.5,
-  pesoInicial: 66.5,
-  fechaInicio: '2026-06-03',
-  objetivo: 60,
+  nombre: 'Jesús',
+  alturaCm: 171,
+  pesoInicial: 90,
+  fechaInicio: '2026-08-01',
+  objetivo: 80,
 };

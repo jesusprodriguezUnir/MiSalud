@@ -1,4 +1,4 @@
-# Plan de Ana
+# Plan de Jesús
 
 App web para seguir el plan dietético de junio 2026: qué cocinar cada día, qué entrenar y
 registro de peso con tendencia. Todo persistido en Firebase.
@@ -29,7 +29,7 @@ de índices compuestos ni de consultas por rango.
 
 1. **Crear el proyecto** en <https://console.firebase.google.com> (plan Spark gratuito sobra).
 2. **Activar Authentication → Sign-in method → Correo electrónico/contraseña**, y crear el
-   usuario de Ana en la pestaña *Users*.
+   usuario de Jesús en la pestaña *Users*.
 3. **Crear la base de datos Firestore** en modo producción, región `eur3` (Europa).
 4. **Registrar una app web** y copiar el objeto de configuración en
    `public/js/firebase-config.js`. Ajusta también `PERFIL_DEFECTO` si cambia el objetivo de peso.
@@ -64,7 +64,7 @@ Al ser datos de salud, conviene además:
 
 - **Dieta**: transcripción literal del PDF del nutricionista, con las 14 recetas completas
   (ingredientes y elaboración) y las cantidades por ración.
-- **Entrenamiento**: respeta el esquema que Ana ya hace (fuerza ×2, pilates, natación,
+- **Entrenamiento**: respeta el esquema que Jesús ya hace (fuerza ×2, pilates, natación,
   caminatas) y lo concreta en ejercicios, series y repeticiones, con las restricciones del
   informe clínico: osteopenia, tendinitis, hernia de hiato/ERGE y mareos por maniobra de
   Valsalva. **Es una propuesta, no una prescripción**: conviene validarla con su fisioterapeuta

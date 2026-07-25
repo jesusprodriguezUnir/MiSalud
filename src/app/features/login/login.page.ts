@@ -10,7 +10,7 @@ import { AuthService } from '../../core/auth.service';
   template: `
     <div id="login">
       <form class="card-login" (ngSubmit)="entrar()">
-        <h1>Plan de Ana</h1>
+        <h1>Plan de Jesús</h1>
         <p>Dieta, entrenamiento y peso, en un sitio.</p>
         <input
           type="email"

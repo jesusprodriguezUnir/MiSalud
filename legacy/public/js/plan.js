@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------------
-// Plan dietético de Ana Isabel Rodríguez Castro (junio 2026)
+// Plan dietético de Jesús (junio 2026)
 // Transcripción fiel del PDF del dietista-nutricionista.
 // Este objeto se usa como SEMILLA: en el primer arranque se escribe en
 // Firestore (usuarios/{uid}/plan/actual) y a partir de ahí manda el documento
@@ -483,7 +483,7 @@ export const DIETA = [
 
 // ---------------------------------------------------------------------------
 // Entrenamiento
-// Respeta el esquema que Ana ya hace (fuerza 2d, natación 1d,
+// Respeta el esquema que Jesús ya hace (fuerza 2d, natación 1d,
 // pilates 1d) y lo concreta. Condicionantes del informe que lo determinan:
 //   - Osteopenia (cuello femoral T -2,0): prioridad a fuerza e impacto ligero.
 //   - Mareos con fuerza de brazos por apnea: nunca aguantar la respiración,

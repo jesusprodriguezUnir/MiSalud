@@ -34,11 +34,11 @@ const db = getFirestore();
 // primer login; aquí dejamos perfil y una versión marcadora del plan para poder
 // probar reglas y despliegue sin abrir la UI.
 const perfil = {
-  nombre: 'Ana',
-  alturaCm: 158.5,
-  pesoInicial: 66.5,
-  fechaInicio: '2026-06-03',
-  objetivo: 60,
+  nombre: 'Jesús',
+  alturaCm: 171,
+  pesoInicial: 90,
+  fechaInicio: '2026-08-01',
+  objetivo: 80,
 };
 
 await db.doc(`usuarios/${uid}/perfil/datos`).set(perfil);
