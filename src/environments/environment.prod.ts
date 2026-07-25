@@ -7,12 +7,12 @@ import type { Perfil } from '../app/domain/plan.types';
 export const environment = {
   production: true,
   firebase: {
-    apiKey: 'TU_API_KEY',
-    authDomain: 'TU_PROYECTO.firebaseapp.com',
-    projectId: 'TU_PROYECTO',
-    storageBucket: 'TU_PROYECTO.appspot.com',
-    messagingSenderId: '000000000000',
-    appId: '1:000000000000:web:xxxxxxxxxxxxxxxx',
+    apiKey: 'AIzaSyAMJpcsEdghzQb70ZkBpWFFw2gqNyOElig',
+    authDomain: 'misalud-133ef.firebaseapp.com',
+    projectId: 'misalud-133ef',
+    storageBucket: 'misalud-133ef.firebasestorage.app',
+    messagingSenderId: '322417702439',
+    appId: '1:322417702439:web:8d78ee905770f844fb0002',
   },
   useEmulators: false,
 };

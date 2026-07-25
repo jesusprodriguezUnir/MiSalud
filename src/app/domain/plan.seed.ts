@@ -488,7 +488,7 @@ export const DIETA: DiaDieta[] = [
 
 // ---------------------------------------------------------------------------
 // Entrenamiento
-// Respeta el esquema que Ana ya hace (golf 1d, fuerza 2d, natación 1d,
+// Respeta el esquema que Ana ya hace (fuerza 2d, natación 1d,
 // pilates 1d) y lo concreta. Condicionantes del informe que lo determinan:
 //   - Osteopenia (cuello femoral T -2,0): prioridad a fuerza e impacto ligero.
 //   - Mareos con fuerza de brazos por apnea: nunca aguantar la respiración,
@@ -596,14 +596,14 @@ export const ENTRENO: DiaEntreno[] = [
   },
   {
     dia: 'Sábado',
-    titulo: 'Golf',
-    duracion: '4 h 30 min',
+    titulo: 'Caminata / Actividad al aire libre',
+    duracion: '60 min',
     tipo: 'cardio',
     bloques: [
       { t: 'Antes de salir (10 min)', e: ['Movilidad de cadera y columna dorsal, activación de glúteo.'] },
-      { t: 'Vuelta', e: ['Camina el recorrido siempre que puedas: son varias horas de actividad de baja intensidad.'] },
+      { t: 'Actividad', e: ['Paseo al aire libre, senderismo o caminata continua a ritmo cómodo.'] },
     ],
-    claves: ['Hidrátate durante el recorrido, sobre todo con el calor.', 'Lleva el tentempié previsto para no llegar a la comida con hambre acumulada.'],
+    claves: ['Hidrátate bien durante la actividad.', 'Lleva el tentempié previsto para no llegar a la comida con hambre acumulada.'],
   },
   {
     dia: 'Domingo',

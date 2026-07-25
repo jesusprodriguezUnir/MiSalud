@@ -48,3 +48,4 @@ firestore-debug.log
 ui-debug.log
 # Credenciales de admin — NUNCA subir (las claves web sí son públicas, esto no)
 service-account.json
+*-firebase-adminsdk-*.json

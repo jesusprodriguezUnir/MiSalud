@@ -2,12 +2,12 @@
 // Consola de Firebase > Configuración del proyecto > Tus apps > App web > Configuración del SDK.
 // Estas claves NO son secretas: la seguridad la dan las reglas de Firestore.
 export const firebaseConfig = {
-  apiKey: 'TU_API_KEY',
-  authDomain: 'TU_PROYECTO.firebaseapp.com',
-  projectId: 'TU_PROYECTO',
-  storageBucket: 'TU_PROYECTO.appspot.com',
-  messagingSenderId: '000000000000',
-  appId: '1:000000000000:web:xxxxxxxxxxxxxxxx'
+  apiKey: 'AIzaSyAMJpcsEdghzQb70ZkBpWFFw2gqNyOElig',
+  authDomain: 'misalud-133ef.firebaseapp.com',
+  projectId: 'misalud-133ef',
+  storageBucket: 'misalud-133ef.firebasestorage.app',
+  messagingSenderId: '322417702439',
+  appId: '1:322417702439:web:8d78ee905770f844fb0002'
 };
 
 // Peso de partida y objetivo (se pueden cambiar aquí o desde Firestore en

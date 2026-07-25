@@ -107,7 +107,7 @@ Al ser datos de salud, conviene además:
 
 - **Dieta**: transcripción literal del PDF del nutricionista, con las 14 recetas completas
   (ingredientes y elaboración) y las cantidades por ración.
-- **Entrenamiento**: respeta el esquema que Ana ya hace (fuerza ×2, pilates, natación, golf,
+- **Entrenamiento**: respeta el esquema que Ana ya hace (fuerza ×2, pilates, natación,
   caminatas) y lo concreta en ejercicios, series y repeticiones, con las restricciones del informe
   clínico: osteopenia, tendinitis, hernia de hiato/ERGE y mareos por maniobra de Valsalva. **Es una
   propuesta, no una prescripción**: conviene validarla con su fisioterapeuta o entrenador.
