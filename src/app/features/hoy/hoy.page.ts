@@ -7,6 +7,8 @@ import { idxDia } from '../../domain/fecha.util';
 import { tieneReceta } from '../../domain/plan.types';
 import type { IngestaKey } from '../../domain/plan.types';
 import { RecetaDetalle } from './receta-detalle';
+import { FotoPlaceholder } from '../../shared/foto-placeholder';
+import { FechaLargaPipe } from '../../shared/pipes/fecha-larga.pipe';
 
 const ORDEN: IngestaKey[] = ['desayuno', 'tentempie', 'comida', 'merienda', 'cena'];
 const NOMBRE_INGESTA: Record<IngestaKey, string> = {
@@ -20,13 +22,13 @@ const NOMBRE_INGESTA: Record<IngestaKey, string> = {
 @Component({
   selector: 'app-hoy',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RecetaDetalle],
+  imports: [RecetaDetalle, FotoPlaceholder, FechaLargaPipe],
   templateUrl: './hoy.page.html',
 })
 export class HoyPage {
   private readonly planSvc = inject(PlanService);
   private readonly diaSvc = inject(DiaService);
-  private readonly nav = inject(NavegacionService);
+  readonly nav = inject(NavegacionService);
   private readonly exportSvc = inject(ExportService);
 
   readonly tieneReceta = tieneReceta;
@@ -45,6 +47,19 @@ export class HoyPage {
   });
   readonly hechas = computed(
     () => this.ingestas().filter(({ key }) => this.estado().hechas[key]).length,
+  );
+
+  // Progreso del día: un segmento por ingesta más uno por el entrenamiento.
+  readonly segmentos = computed<boolean[]>(() => {
+    const est = this.estado();
+    return [...this.ingestas().map(({ key }) => !!est.hechas[key]), est.entreno];
+  });
+  readonly total = computed(() => this.segmentos().length);
+  readonly hechasTotal = computed(() => this.segmentos().filter(Boolean).length);
+  readonly pct = computed(() => Math.round((this.hechasTotal() / this.total()) * 100));
+
+  readonly diaSemana = computed(() =>
+    this.nav.fecha().toLocaleDateString('es-ES', { weekday: 'long' }),
   );
 
   toggleEntreno(): void {

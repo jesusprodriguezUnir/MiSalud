@@ -1,23 +1,32 @@
-<div class="export-bar">
-  <button class="btn ghost mini" (click)="exportarPdf()">📄 Exportar Lista PDF</button>
-</div>
-
-<div class="card">
-  <div class="card-h">
-    <h3>Lista de la compra</h3>
-    <button class="btn ghost mini" (click)="toggleTodos()">Todos</button>
-  </div>
+<section class="seccion">
+  <h2 class="seccion-tit">
+    Días incluidos
+    <button class="btn ghost mini" (click)="toggleTodos()">
+      {{ todos() ? 'Ninguno' : 'Todos' }}
+    </button>
+  </h2>
   <div class="compra-dias">
     @for (d of dias; track $index; let i = $index) {
-      <button class="pill" [class.on]="activo(i)" (click)="toggleDia(i)">{{ d }}</button>
+      <button
+        class="pill"
+        [class.on]="activo(i)"
+        (click)="toggleDia(i)"
+        [attr.aria-pressed]="activo(i)"
+      >
+        {{ d }}
+      </button>
     }
   </div>
-  <div class="card-b">
-    @if (!hayItems()) {
-      <p class="empty">Selecciona al menos un día.</p>
-    }
-    @for (g of grupos(); track g.categoria) {
-      <div class="cat">{{ g.categoria }}</div>
+</section>
+
+@if (!hayItems()) {
+  <p class="empty">Selecciona al menos un día.</p>
+}
+
+<div class="compra-lista">
+  @for (g of grupos(); track g.categoria) {
+    <div class="compra-grupo">
+      <h3 class="cat">{{ g.categoria }}</h3>
       @for (v of g.items; track v.n) {
         <div class="item">
           <div class="n">{{ v.n }}</div>
@@ -30,8 +39,12 @@
           </div>
         </div>
       }
-    }
-  </div>
+    </div>
+  }
+</div>
+
+<div class="export-bar">
+  <button class="btn ghost mini" (click)="exportarPdf()">Exportar lista en PDF</button>
 </div>
 
 <div class="aviso">

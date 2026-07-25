@@ -9,7 +9,7 @@ import { FotoPlaceholder } from '../../shared/foto-placeholder';
   imports: [FotoPlaceholder],
   template: `
     <details class="rec">
-      <summary><span class="chev">›</span> Ver receta</summary>
+      <summary>Ver receta</summary>
       <div class="rec-body">
         <app-foto-placeholder
           variante="plato"
@@ -17,17 +17,16 @@ import { FotoPlaceholder } from '../../shared/foto-placeholder';
           [texto]="receta().fotoUrl ? receta().ing[0] : 'Foto del plato'"
         />
         <h4>Ingredientes (1 persona)</h4>
-        <ul>
-          @for (i of receta().ing; track i) {
-            <li>{{ i }}</li>
-          }
-        </ul>
+        @for (i of receta().ing; track i) {
+          <div class="rec-ing">{{ i }}</div>
+        }
         <h4>Elaboración</h4>
-        <ol>
-          @for (p of receta().pasos; track p) {
-            <li>{{ p }}</li>
-          }
-        </ol>
+        @for (p of receta().pasos; track p; let idx = $index) {
+          <div class="rec-paso">
+            <span class="num">{{ idx + 1 }}</span>
+            <span class="txt">{{ p }}</span>
+          </div>
+        }
         @if (receta().nota) {
           <div class="nota">{{ receta().nota }}</div>
         }

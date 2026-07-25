@@ -9,7 +9,12 @@
       "PowerShell(npm run lint 2>&1)",
       "PowerShell(npm test 2>&1)",
       "PowerShell(npm run format:check 2>&1)",
-      "PowerShell(npm run format 2>&1)"
+      "PowerShell(npm run format 2>&1)",
+      "Bash(npx prettier *)",
+      "Bash(command -v chromium-cli)",
+      "Bash(java -version)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:4200/)",
+      "Bash(curl -s http://localhost:4200/)"
     ]
   }
 }

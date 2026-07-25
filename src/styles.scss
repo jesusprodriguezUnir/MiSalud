@@ -148,23 +148,35 @@ h3 {
   color: var(--muted);
 }
 
+// — sangrado a los bordes de la pantalla —
+// Compensa el padding lateral de .wrap para que una banda (el panel de
+// entrenamiento, una fila de la semana) llegue al borde en móvil, como en el
+// prototipo. El valor debe seguir al padding de .wrap.
+.bleed {
+  margin-inline: -16px;
+  padding-inline: 16px;
+}
+
 // ---------- formularios / botones ----------
+// Sin cajas: los campos son una línea de 2px bajo el texto (Modernist).
 input[type='email'],
 input[type='password'],
 input[type='number'],
 input[type='date'],
 input[type='text'] {
   width: 100%;
-  padding: 11px 12px;
-  border: 2px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--surface-2);
+  padding: 9px 0;
+  border: 0;
+  border-bottom: 2px solid var(--line);
+  border-radius: 0;
+  background: transparent;
   color: var(--text);
   font: inherit;
   margin-bottom: 10px;
 }
 input:focus-visible {
-  outline-offset: -2px;
+  outline-offset: 2px;
+  border-bottom-color: var(--accent);
 }
 .input-lg {
   border: 0 !important;
@@ -208,40 +220,43 @@ input:focus-visible {
   margin-top: 8px;
 }
 
-// ---------- tarjetas y listas ----------
+// ---------- secciones y filas ----------
+// El sistema no usa cajas: la jerarquía la marcan las reglas de 2px (bloques)
+// y las de 1px (filas dentro de un bloque). `.card` sobrevive solo para el
+// esqueleto de carga y las reglas de impresión.
 .card {
-  background: var(--surface);
   border: 2px solid var(--line);
   border-radius: var(--radius);
-  box-shadow: none;
   margin-bottom: 14px;
-  overflow: hidden;
-}
-.card-h {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 13px 15px;
-  border-bottom: 2px solid var(--line);
-}
-.card-h h3 {
-  font-size: 15px;
-  flex: 1;
-}
-.hora {
-  font-size: 12px;
-  font-weight: 800;
-  font-family: var(--font-heading);
-  font-variant-numeric: tabular-nums;
-  color: var(--accent);
-  background: var(--accent-soft);
-  padding: 3px 8px;
-  border-radius: var(--radius);
-}
-.card-b {
-  padding: 6px 15px 13px;
 }
 
+.seccion {
+  padding: 14px 0;
+  border-bottom: 2px solid var(--line);
+}
+.seccion-tit {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-bottom: 2px solid var(--line);
+  padding-bottom: 6px;
+  margin: 0;
+}
+.seccion-tit .aparte {
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--muted);
+}
+
+// Fila «nombre · cantidad» (un alimento, un artículo de la compra).
 .item {
   display: flex;
   gap: 10px;
@@ -254,92 +269,138 @@ input:focus-visible {
 }
 .item .n {
   flex: 1;
-  font-size: 15px;
+  font-size: 14px;
+  line-height: 1.35;
 }
 .item .c {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--muted);
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 .item .nota {
   display: block;
-  font-size: 12px;
+  font-size: 11px;
   color: var(--muted);
   font-style: italic;
+  margin-top: 2px;
 }
 
+// Fila «título + descripción» (hábitos, objetivos del informe).
+.def {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+.def:last-child {
+  border-bottom: 0;
+}
+.def b {
+  display: block;
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  font-size: 13.5px;
+}
+.def span {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+// ---------- receta plegable ----------
 details.rec {
-  margin-top: 4px;
+  margin-top: 2px;
 }
 details.rec summary {
   list-style: none;
   cursor: pointer;
-  font-size: 13px;
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  font-size: 11px;
   color: var(--accent);
-  font-weight: 700;
-  padding: 4px 0;
+  padding: 3px 0;
   display: inline-flex;
   align-items: center;
   gap: 5px;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
 }
 details.rec summary::-webkit-details-marker {
   display: none;
 }
-details.rec[open] summary .chev {
-  transform: rotate(90deg);
+details.rec summary::before {
+  content: '+';
+  font-size: 13px;
+  line-height: 1;
 }
-.chev {
-  transition: transform 0.15s;
-  display: inline-block;
+details.rec[open] summary::before {
+  content: '−';
 }
 .rec-body {
-  background: var(--surface-2);
+  background: var(--surface);
   border: 2px solid var(--line);
   border-radius: var(--radius);
-  padding: 12px 14px;
+  padding: 12px;
   margin: 6px 0 4px;
-  font-size: 14px;
 }
-.rec-body .foto-placeholder {
-  margin-bottom: 12px;
+.rec-body .foto-placeholder,
+.rec-body .foto-container {
+  margin-bottom: 10px;
 }
 .rec-body h4 {
-  font-size: 11px;
-  font-weight: 800;
+  font-size: 10px;
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   color: var(--muted);
-  margin: 0 0 6px;
+  margin: 0 0 2px;
 }
-.rec-body ul {
-  margin: 0 0 12px;
-  padding-left: 18px;
+.rec-body h4 + * {
+  margin-top: 0;
 }
-.rec-body ol {
-  margin: 0;
-  padding-left: 18px;
+.rec-body h4:not(:first-child) {
+  margin-top: 12px;
 }
-.rec-body li {
-  margin-bottom: 5px;
+.rec-ing {
+  font-size: 12.5px;
+  line-height: 1.35;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+.rec-paso {
+  display: flex;
+  gap: 8px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+.rec-paso .num {
+  min-width: 16px;
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  font-size: 11px;
+  color: var(--accent);
+}
+.rec-paso .txt {
+  font-size: 12.5px;
+  line-height: 1.4;
 }
 .rec-body .nota {
   margin-top: 10px;
-  font-size: 13px;
+  font-size: 12px;
+  line-height: 1.4;
   color: var(--warn);
   border-left: 3px solid var(--accent);
   padding: 4px 0 4px 10px;
 }
 
+// Casilla de «hecho»: cuadrado hueco que se rellena de acento al marcarse.
 .chk {
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
   flex: 0 0 auto;
   border-radius: var(--radius);
   border: 2px solid var(--line);
-  background: var(--surface-2);
+  background: transparent;
   display: grid;
   place-items: center;
   padding: 0;
@@ -349,8 +410,8 @@ details.rec[open] summary .chev {
   border-color: var(--accent);
 }
 .chk svg {
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 15px;
   stroke: var(--bg);
   stroke-width: 3;
   fill: none;
@@ -361,180 +422,68 @@ details.rec[open] summary .chev {
 .chk.on svg {
   opacity: 1;
 }
+.chk.mini {
+  width: 26px;
+  height: 26px;
+}
 
 .tag {
   display: inline-block;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  padding: 3px 8px;
-  border-radius: var(--radius);
-  background: var(--accent-soft);
-  color: var(--accent);
-}
-.tag.gris {
-  background: var(--surface-2);
-  color: var(--muted);
-}
-.bloque {
-  margin: 12px 0;
-}
-.bloque h4 {
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  border-bottom: 2px solid var(--line);
-  padding-bottom: 4px;
-  margin-bottom: 8px;
-}
-.bloque ul {
-  margin: 0;
-  padding-left: 18px;
-  font-size: 14px;
-}
-.bloque li {
-  margin-bottom: 4px;
-}
-.claves {
-  margin-top: 10px;
-}
-.claves ul {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.claves li {
-  font-size: 13px;
-  line-height: 1.4;
-  color: var(--warn);
-  border-left: 3px solid var(--accent);
-  padding: 4px 0 4px 10px;
-  margin-bottom: 6px;
-}
-
-// ---------- semana ----------
-.semana {
-  display: grid;
-  gap: 10px;
-}
-.dcard {
-  display: flex;
-  gap: 14px;
-  align-items: center;
-  background: transparent;
-  border: 2px solid var(--line);
-  border-left: 6px solid var(--line);
-  border-radius: var(--radius);
-  padding: 12px 14px;
-  box-shadow: none;
-  text-align: left;
-  width: 100%;
-}
-.dcard-img-wrap {
-  width: 64px;
-  height: 64px;
-  flex: 0 0 64px;
-  border-radius: calc(var(--radius) - 2px);
-  overflow: hidden;
-  border: 1px solid var(--line);
-  background: var(--surface-2);
-}
-.dcard-img-wrap img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-.dcard-content {
-  flex: 1;
-  min-width: 0;
-}
-.dcard.hoy {
-  border-left-color: var(--accent);
-  background: var(--surface);
-}
-.dcard .top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 6px;
-}
-.dcard .top strong {
   font-family: var(--font-heading);
   font-weight: var(--font-heading-weight);
-  font-size: 18px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: var(--bg);
 }
-.dcard p {
-  margin: 2px 0;
-  font-size: 13px;
-  color: var(--muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.dcard p b {
+.tag.gris {
+  background: var(--color-neutral-200);
   color: var(--text);
-  font-weight: 600;
 }
 
-// ---------- hoy: grid de escritorio ----------
-.hoy-hero .foto-placeholder {
-  display: none;
-}
-@media (min-width: 960px) {
-  .hoy-grid {
-    display: grid;
-    grid-template-columns: 1.6fr 1fr;
-    grid-template-areas: 'hero aside' 'ingestas aside';
-    gap: 0 32px;
-  }
-  .hoy-hero {
-    grid-area: hero;
-  }
-  .hoy-ingestas {
-    grid-area: ingestas;
-  }
-  .hoy-aside {
-    grid-area: aside;
-  }
-  .hoy-hero .foto-placeholder {
-    display: flex;
-    margin-top: 16px;
-  }
-}
-
-// ---------- progreso del día ----------
+// ---------- hoy ----------
+// Progreso del día: porcentaje grande + un bloque por ingesta y otro por el
+// entrenamiento, para leer en dos segundos qué queda pendiente.
 .progreso {
   display: flex;
   align-items: flex-end;
   gap: 14px;
   padding: 14px 0;
   border-bottom: 2px solid var(--line);
-  margin-bottom: 14px;
 }
 .progreso-num {
-  flex: 0 0 auto;
+  flex: 1;
+}
+.progreso-num .kicker {
+  display: block;
 }
 .progreso-num strong {
   font-family: var(--font-heading);
   font-weight: var(--font-heading-weight);
-  font-size: 36px;
+  font-size: 40px;
   line-height: 1;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
+}
+.progreso-num em {
+  font-style: normal;
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  font-size: 16px;
 }
 .progreso-num span {
-  display: block;
-  margin-top: 4px;
   font-size: 12px;
   color: var(--muted);
+  margin-left: 6px;
 }
 .progreso-barra {
   flex: 1;
   display: flex;
   gap: 3px;
   align-items: flex-end;
-  height: 30px;
+  height: 34px;
 }
 .progreso-seg {
   flex: 1;
@@ -545,6 +494,142 @@ details.rec[open] summary .chev {
 .progreso-seg.on {
   background: var(--accent);
   border-color: var(--accent);
+}
+
+// Una ingesta: la hora en acento es el ancla de lectura de la fila.
+.ingesta {
+  border-bottom: 2px solid var(--line);
+  padding-bottom: 10px;
+}
+.ingesta-h {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0 6px;
+}
+.ingesta-h .hora {
+  min-width: 52px;
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  font-size: 13px;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+.ingesta-h h3 {
+  flex: 1;
+  font-size: 17px;
+  letter-spacing: -0.01em;
+}
+
+// Panel de entrenamiento: la única banda con fondo de la pantalla. No lleva
+// filo superior: se apoya en la regla con la que cierra la última ingesta.
+.entreno {
+  background: var(--surface);
+  border-bottom: 2px solid var(--line);
+  padding: 14px 16px;
+}
+.entreno-h {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.entreno-h .tit {
+  flex: 1;
+}
+.entreno-h .kicker {
+  color: var(--accent);
+  letter-spacing: 0.1em;
+}
+.entreno-h h3 {
+  font-size: 19px;
+  line-height: 1.1;
+  margin-top: 4px;
+}
+.bloque {
+  margin-top: 12px;
+}
+.bloque h4 {
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-bottom: 2px solid var(--line);
+  padding-bottom: 4px;
+  margin: 0;
+}
+.bloque ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.bloque li {
+  font-size: 13px;
+  line-height: 1.35;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+.claves {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.claves li {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--warn);
+  border-left: 3px solid var(--accent);
+  padding: 4px 0 4px 10px;
+  margin-top: 8px;
+}
+
+// Cabecera del día. En móvil el día ya está en la barra superior del marco,
+// así que este titular solo aparece en el panel de escritorio.
+.dia-hero {
+  display: none;
+}
+
+// ---------- semana ----------
+// Una fila por día, a sangre, con el día mostrado marcado en el filo izquierdo.
+.dia-fila {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid var(--line);
+  border-left: 6px solid transparent;
+  padding: 14px 16px;
+  color: var(--text);
+  font: inherit;
+}
+.dia-fila.hoy {
+  border-left-color: var(--accent);
+  background: var(--surface);
+}
+.dia-fila .top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+// `.p` en vez de <p>: dentro de un <button> solo cabe contenido de frase.
+.dia-fila .p {
+  display: block;
+  margin-top: 4px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+.dia-fila .p b {
+  color: var(--text);
+  font-weight: 600;
+}
+.dia-fila .top strong {
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  font-size: 20px;
+  letter-spacing: -0.01em;
 }
 
 // ---------- placeholder de foto / foto container ----------
@@ -564,47 +649,65 @@ details.rec[open] summary .chev {
 }
 .foto-placeholder {
   border-style: dashed;
+  font-size: 12px;
+  text-align: center;
+  padding: 0 12px;
+}
+.foto-placeholder svg {
+  width: 26px;
+  height: 26px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 .foto-placeholder.hero,
 .foto-container.hero {
   aspect-ratio: 16 / 9;
 }
+// «La fotografía se imprime en blanco y negro»: regla del sistema Modernist.
 .foto-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+  filter: grayscale(1) contrast(1.08);
 }
 
 // ---------- peso ----------
+// Rejilla de indicadores separada por reglas, no por tarjetas.
 .kpis {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
-  gap: 10px;
-  margin-bottom: 14px;
+  grid-template-columns: repeat(2, 1fr);
+  border-bottom: 2px solid var(--line);
 }
 .kpi {
-  background: var(--surface);
-  border: 2px solid var(--line);
-  border-radius: var(--radius);
-  box-shadow: none;
-  padding: 11px 12px;
+  padding: 12px 14px 12px 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+.kpi:nth-child(odd) {
+  border-right: 1px solid var(--line-soft);
+}
+.kpi:nth-child(even) {
+  padding-left: 14px;
 }
 .kpi span {
   display: block;
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--muted);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.1em;
 }
 .kpi strong {
   font-family: var(--font-heading);
   font-weight: var(--font-heading-weight);
   font-variant-numeric: tabular-nums;
-  font-size: 19px;
+  font-size: 26px;
+  letter-spacing: -0.02em;
   display: block;
-  margin-top: 3px;
+  margin-top: 2px;
 }
 .kpi strong.down {
   color: var(--accent);
@@ -612,13 +715,21 @@ details.rec[open] summary .chev {
 .kpi strong.up {
   color: var(--warn);
 }
+
+// Alta de peso: cifra grande, unidad y botón en una sola línea.
 .form-row {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   align-items: flex-end;
 }
 .form-row input {
   margin-bottom: 0;
+}
+.form-row .u {
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  font-size: 14px;
+  padding-bottom: 10px;
 }
 .form-row .btn {
   width: auto;
@@ -626,15 +737,15 @@ details.rec[open] summary .chev {
 }
 svg.chart {
   width: 100%;
-  height: 230px;
+  height: 200px;
   display: block;
 }
 .leyenda {
   display: flex;
   gap: 14px;
-  font-size: 12px;
+  font-size: 11px;
   color: var(--muted);
-  padding: 0 15px 12px;
+  padding: 8px 0 0;
   flex-wrap: wrap;
 }
 .leyenda i {
@@ -650,13 +761,27 @@ table.pesos {
   border-collapse: collapse;
   font-size: 14px;
 }
+// Fecha · variación · peso · borrar.
 table.pesos td {
   padding: 8px 0;
   border-bottom: 1px solid var(--line-soft);
   font-variant-numeric: tabular-nums;
+  font-size: 13.5px;
 }
-table.pesos td:nth-child(2) {
+table.pesos td.delta {
   text-align: right;
+  font-size: 12px;
+  color: var(--muted);
+  padding-right: 10px;
+}
+table.pesos td.delta.down {
+  color: var(--accent);
+}
+table.pesos td:nth-child(3) {
+  text-align: right;
+  width: 74px;
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
 }
 table.pesos td:last-child {
   text-align: right;
@@ -675,13 +800,12 @@ table.pesos td:last-child {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  padding: 0 15px 12px;
 }
 .pill {
   font-size: 12px;
   font-family: var(--font-heading);
   font-weight: var(--font-heading-weight);
-  padding: 6px 11px;
+  padding: 6px 10px;
   border-radius: var(--radius);
   border: 2px solid var(--line);
   background: transparent;
@@ -693,19 +817,19 @@ table.pesos td:last-child {
   color: var(--bg);
 }
 .cat {
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
   font-size: 10px;
-  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   color: var(--accent);
   border-bottom: 2px solid var(--line);
-  margin: 16px 0 6px;
+  margin: 16px 0 0;
   padding-bottom: 5px;
 }
 .empty {
   color: var(--muted);
   font-size: 14px;
-  text-align: center;
   padding: 24px 0;
 }
 .aviso {
@@ -735,6 +859,85 @@ table.pesos td:last-child {
   gap: 6px;
 }
 
+// ---------- panel de escritorio ----------
+// A partir de 960px «Hoy» deja de ser una lista y pasa a ser un panel: titular
+// del día y progreso arriba a la izquierda, foto a la derecha, y debajo las
+// ingestas junto a una columna con entrenamiento y hábitos.
+.hoy-foto {
+  display: none;
+}
+@media (min-width: 960px) {
+  .hoy-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    grid-template-areas: 'hero foto' 'ingestas aside';
+    column-gap: 32px;
+    border-top: 2px solid var(--line);
+  }
+  .hoy-hero {
+    grid-area: hero;
+    padding: 22px 0;
+    border-bottom: 2px solid var(--line);
+  }
+  .hoy-foto {
+    grid-area: foto;
+    display: block;
+    border-bottom: 2px solid var(--line);
+    border-left: 2px solid var(--line);
+  }
+  .hoy-foto .foto-placeholder,
+  .hoy-foto .foto-container {
+    height: 100%;
+    aspect-ratio: auto;
+    border: 0;
+  }
+  .hoy-ingestas {
+    grid-area: ingestas;
+  }
+  .hoy-aside {
+    grid-area: aside;
+    border-left: 2px solid var(--line);
+    padding-left: 32px;
+    margin-left: -32px;
+  }
+
+  .dia-hero {
+    display: block;
+  }
+  .dia-hero .kicker {
+    color: var(--accent);
+    letter-spacing: 0.1em;
+  }
+  .dia-hero h1 {
+    font-size: 56px;
+    letter-spacing: -0.035em;
+    line-height: 0.95;
+    margin: 6px 0 0;
+    text-transform: capitalize;
+  }
+
+  // En el panel el progreso ya vive dentro de la cabecera: sin regla propia.
+  .hoy-hero .progreso {
+    border-bottom: 0;
+    padding: 16px 0 0;
+  }
+  // El entrenamiento deja de ir a sangre y se integra en la columna.
+  .hoy-aside .entreno {
+    margin-inline: 0;
+  }
+  // Semana y compra ganan dos columnas cuando hay sitio.
+  .semana {
+    border-top: 2px solid var(--line);
+  }
+  .compra-lista {
+    columns: 2;
+    column-gap: 40px;
+  }
+  .compra-lista .compra-grupo {
+    break-inside: avoid;
+  }
+}
+
 // ---------- reglas de impresión (PDF) ----------
 @media print {
   header,
@@ -759,11 +962,26 @@ table.pesos td:last-child {
     padding: 0 !important;
   }
 
-  .card {
-    border: 1px solid #ccc !important;
+  .card,
+  .seccion,
+  .ingesta,
+  .entreno,
+  .compra-grupo {
+    border-color: #ccc !important;
     background: #ffffff !important;
     break-inside: avoid;
     page-break-inside: avoid;
+  }
+  .hoy-grid {
+    display: block !important;
+  }
+  .bleed {
+    margin-inline: 0 !important;
+    padding-inline: 0 !important;
+  }
+  .hoy-foto,
+  .dia-hero {
+    display: none !important;
   }
 
   details.rec {
