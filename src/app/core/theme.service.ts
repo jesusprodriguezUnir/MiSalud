@@ -11,7 +11,7 @@ export class ThemeService {
   constructor() {
     effect(() => {
       const t = this.tema();
-      document.body.dataset['tema'] = t;
+      this.aplicarTema(t);
       localStorage.setItem(STORAGE_KEY, t);
     });
   }
@@ -20,9 +20,20 @@ export class ThemeService {
     this.tema.update((t) => (t === 'claro' ? 'oscuro' : 'claro'));
   }
 
+  private aplicarTema(t: Tema): void {
+    document.documentElement.dataset['tema'] = t;
+    document.body.dataset['tema'] = t;
+
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeColorMeta) {
+      themeColorMeta.setAttribute('content', t === 'oscuro' ? '#151413' : '#ec3013');
+    }
+  }
+
   private inicial(): Tema {
     const guardado = localStorage.getItem(STORAGE_KEY);
     if (guardado === 'claro' || guardado === 'oscuro') return guardado;
     return matchMedia('(prefers-color-scheme: dark)').matches ? 'oscuro' : 'claro';
   }
 }
+

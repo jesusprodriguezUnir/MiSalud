@@ -30,6 +30,7 @@ export interface Receta {
   ing: string[];
   pasos: string[];
   nota?: string;
+  fotoUrl?: string;
 }
 
 export interface Ingesta {
