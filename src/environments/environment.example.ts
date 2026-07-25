@@ -1,24 +1,20 @@
-// Plantilla de configuración. Copia este fichero a `environment.ts` y rellena
-// con los datos de tu proyecto:
-//   Consola de Firebase > Configuración del proyecto > Tus apps > App web.
+// Plantilla de configuración. Los datos reales viven en `firebase.config.ts`
+// (claves de Firebase + perfil por defecto), compartido por `environment.ts` y
+// `environment.prod.ts`; estos dos solo declaran `production` y `useEmulators`.
 //
-// Estas claves NO son secretas: la seguridad la dan las reglas de Firestore.
-// Por eso `environment.ts` se versiona igualmente; esta plantilla queda solo
-// como documentación del formato.
+// Copia el bloque de abajo a `firebase.config.ts` y rellénalo con los datos de
+//   Consola de Firebase > Configuración del proyecto > Tus apps > App web.
+// Estas claves NO son secretas: la seguridad la dan las reglas de Firestore,
+// por eso los ficheros se versionan igualmente.
 import type { Perfil } from '../app/domain/plan.types';
 
-export const environment = {
-  production: false,
-  firebase: {
-    apiKey: 'TU_API_KEY',
-    authDomain: 'TU_PROYECTO.firebaseapp.com',
-    projectId: 'TU_PROYECTO',
-    storageBucket: 'TU_PROYECTO.appspot.com',
-    messagingSenderId: '000000000000',
-    appId: '1:000000000000:web:xxxxxxxxxxxxxxxx',
-  },
-  // Usar los emuladores locales en desarrollo (npm run emulators).
-  useEmulators: false,
+export const FIREBASE_CONFIG = {
+  apiKey: 'TU_API_KEY',
+  authDomain: 'TU_PROYECTO.firebaseapp.com',
+  projectId: 'TU_PROYECTO',
+  storageBucket: 'TU_PROYECTO.appspot.com',
+  messagingSenderId: '000000000000',
+  appId: '1:000000000000:web:xxxxxxxxxxxxxxxx',
 };
 
 // Peso de partida y objetivo. Se pueden cambiar aquí o desde Firestore en

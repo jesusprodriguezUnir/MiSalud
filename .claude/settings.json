@@ -2,7 +2,14 @@
   "permissions": {
     "allow": [
       "Bash(git checkout *)",
-      "Bash(git status *)"
+      "Bash(git status *)",
+      "PowerShell(git -C d:\\\\Personal\\\\MiSalud status --short)",
+      "PowerShell(git -C d:\\\\Personal\\\\MiSalud log --oneline -3)",
+      "PowerShell(npm run build 2>&1)",
+      "PowerShell(npm run lint 2>&1)",
+      "PowerShell(npm test 2>&1)",
+      "PowerShell(npm run format:check 2>&1)",
+      "PowerShell(npm run format 2>&1)"
     ]
   }
 }

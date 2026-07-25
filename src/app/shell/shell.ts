@@ -9,6 +9,7 @@ import { NavegacionService } from '../core/navegacion.service';
 import { ConectividadService } from '../core/conectividad.service';
 import { ThemeService } from '../core/theme.service';
 import { FechaLargaPipe } from '../shared/pipes/fecha-larga.pipe';
+import { AvisoToast } from './aviso-toast';
 
 // Marco de la app autenticada: cabecera con navegación de día, banda de "Sin
 // conexión", contenido enrutado y barra de pestañas inferior. Al montarse
@@ -16,7 +17,7 @@ import { FechaLargaPipe } from '../shared/pipes/fecha-larga.pipe';
 @Component({
   selector: 'app-shell',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, TitleCasePipe, FechaLargaPipe],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, TitleCasePipe, FechaLargaPipe, AvisoToast],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
 })
@@ -35,6 +36,9 @@ export class Shell {
   readonly temaLabel = computed(() =>
     this.theme.tema() === 'claro' ? 'Modo oscuro' : 'Modo claro',
   );
+  /** Hasta que el plan remoto no ha respondido se muestra un esqueleto: los
+   * signals contienen la semilla local y pintarla sería mentir. */
+  readonly listo = computed(() => !this.planSvc.cargando());
 
   constructor() {
     // Cuando hay usuario, arranca la carga de datos una sola vez.

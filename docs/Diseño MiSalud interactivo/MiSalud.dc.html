@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/modernist-f497ceee-ba91-434a-b377-00b0dc739391/styles.css">
+<script src="_ds/modernist-f497ceee-ba91-434a-b377-00b0dc739391/_ds_bundle.js"></script>
+<script src="./image-slot.js"></script>
+<style>
+body{margin:0;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body)}
+body[data-tema="oscuro"]{
+  --color-bg:#151413;--color-surface:#201e1d;--color-text:#f3f2f2;
+  --color-divider:color-mix(in srgb,#f3f2f2 38%,transparent);
+  --color-accent:#ff563c;--color-accent-600:#ff9783;--color-accent-700:#ffc4b8;
+  --color-neutral-100:#2d2b2b;--color-neutral-200:#363333;--color-neutral-300:#444141;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.5);--shadow-md:0 3px 10px rgba(0,0,0,.55);
+}
+a{color:var(--color-accent)}
+a:hover{color:var(--color-accent-600)}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-thumb{background:var(--color-neutral-300)}
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:var(--color-bg);padding:28px 32px 64px">
+
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;border-bottom:2px solid var(--color-divider);padding-bottom:14px;margin-bottom:28px">
+    <div>
+      <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--color-accent);font-weight:800">Rediseño · MiSalud</div>
+      <h2 style="margin:4px 0 0;font-size:30px">Plan de {{ pacienteNombre }} — prototipo</h2>
+      <p style="margin:6px 0 0;max-width:62ch;font-size:13px;color:var(--color-neutral-700)">Dieta, entrenamiento, peso y compra sobre el sistema Modernist. Todo es navegable: cambia de día, marca ingestas, abre recetas, registra un peso o arma la lista.</p>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <sc-for list="{{ pacientes }}" as="p" hint-placeholder-count="2">
+        <button class="btn btn-secondary" onClick="{{ p.pick }}" style="justify-content:center;background: {{ p.bg }};color: {{ p.fg }};border-color:var(--color-divider)">{{ p.nombre }}</button>
+      </sc-for>
+      <span style="width:2px;height:26px;background:var(--color-divider);margin:0 4px"></span>
+      <button class="btn btn-secondary" onClick="{{ toggleTema }}" style="justify-content:center">{{ temaLabel }}</button>
+      <button class="btn btn-secondary" onClick="{{ toggleVariante }}" style="justify-content:center">Hoy: variante {{ variante }}</button>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:56px;align-items:flex-start;flex-wrap:wrap">
+
+    <div style="flex:0 0 auto">
+      <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:12px">
+        <span style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase">Móvil · PWA</span>
+        <span style="font-size:11px;color:var(--color-neutral-600)">390 × 844 · variante {{ variante }} — {{ varianteNombre }}</span>
+      </div>
+
+      <div style="width:414px;padding:12px;background:#0c0b0b;border-radius:46px;box-shadow:var(--shadow-lg)">
+        <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;overflow:hidden;display:flex;flex-direction:column;position:relative">
+
+          <div style="height:44px;flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 22px;font-size:12px;font-weight:800;background:var(--color-bg)">
+            <span>9:41</span>
+            <span style="letter-spacing:.08em">MISALUD</span>
+            <span>100%</span>
+          </div>
+
+          <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ true }}">
+            <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;padding:0">
+              <div style="padding:26px 24px 0">
+                <div style="width:44px;height:44px;background:var(--color-accent)"></div>
+                <h1 style="font-size:44px;margin:22px 0 0;letter-spacing:-.03em;line-height:.98">MiSalud</h1>
+                <p style="margin:10px 0 0;font-size:14px;color:var(--color-neutral-700);max-width:26ch">Dieta, entrenamiento y peso. Un plan, un día a la vez.</p>
+              </div>
+              <div style="padding:0 24px">
+                <div style="height:2px;background:var(--color-divider);margin-bottom:20px"></div>
+                <div class="field" style="margin-bottom:12px">
+                  <label style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:800">Correo</label>
+                  <input class="input" type="email" value="jesus@ejemplo.com" style="width:100%;background:transparent;border:0;border-bottom:2px solid var(--color-divider);padding:10px 0;font-size:16px;color:var(--color-text)">
+                </div>
+                <div class="field" style="margin-bottom:22px">
+                  <label style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:800">Contraseña</label>
+                  <input class="input" type="password" value="123456789" style="width:100%;background:transparent;border:0;border-bottom:2px solid var(--color-divider);padding:10px 0;font-size:16px;color:var(--color-text)">
+                </div>
+                <button class="btn btn-primary" onClick="{{ entrar }}" style="width:100%;justify-content:space-between;padding:16px 18px;font-size:16px">Entrar<span>→</span></button>
+                <p style="margin:14px 0 0;font-size:12px;color:var(--color-neutral-600)">Los datos se guardan cifrados en tu cuenta. Funciona sin cobertura y sincroniza al volver.</p>
+              </div>
+              <div style="border-top:2px solid var(--color-divider);padding:14px 24px;display:flex;justify-content:space-between;font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:800;color:var(--color-neutral-600)">
+                <span>Junio 2026</span><span>v2 · Modernist</span>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isApp }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;min-height:0">
+
+              <div style="flex:0 0 auto;border-bottom:2px solid var(--color-divider)">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 18px 2px">
+                  <span style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600)">{{ pacienteNombre }} · {{ tituloPantalla }}</span>
+                  <button class="btn btn-ghost" onClick="{{ salir }}" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase">Salir</button>
+                </div>
+                <div style="display:flex;align-items:stretch;padding:0 8px 10px;gap:6px">
+                  <button class="btn" onClick="{{ diaPrev }}" style="width:38px;justify-content:center;font-size:22px;color:var(--color-accent)">‹</button>
+                  <div style="flex:1;text-align:left">
+                    <div style="font-family:var(--font-heading);font-weight:800;font-size:26px;line-height:1;letter-spacing:-.02em">{{ diaNombre }}</div>
+                    <div style="font-size:12px;color:var(--color-neutral-600);margin-top:3px">{{ fechaLarga }}</div>
+                  </div>
+                  <button class="btn" onClick="{{ diaNext }}" style="width:38px;justify-content:center;font-size:22px;color:var(--color-accent)">›</button>
+                </div>
+              </div>
+
+              <div style="flex:1;overflow:auto;-webkit-overflow-scrolling:touch">
+
+                <sc-if value="{{ isHoy }}" hint-placeholder-val="{{ true }}">
+                  <div>
+                    <div style="padding:16px 18px;border-bottom:2px solid var(--color-divider);display:flex;align-items:flex-end;gap:14px">
+                      <div style="flex:1">
+                        <div style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600)">Progreso del día</div>
+                        <div style="display:flex;align-items:baseline;gap:6px;margin-top:2px">
+                          <span style="font-family:var(--font-heading);font-weight:800;font-size:40px;line-height:1;letter-spacing:-.03em">{{ pct }}</span>
+                          <span style="font-size:16px;font-weight:800">%</span>
+                          <span style="font-size:12px;color:var(--color-neutral-600);margin-left:6px">{{ hechasTxt }}</span>
+                        </div>
+                      </div>
+                      <div style="flex:1;display:flex;gap:3px;align-items:flex-end;height:34px">
+                        <sc-for list="{{ progresoBloques }}" as="b" hint-placeholder-count="6">
+                          <div style="flex:1;height:100%;background: {{ b.bg }};border:2px solid var(--color-divider)"></div>
+                        </sc-for>
+                      </div>
+                    </div>
+
+                    <sc-if value="{{ isVarB }}" hint-placeholder-val="{{ false }}">
+                      <div style="padding:14px 18px;border-bottom:2px solid var(--color-divider);background:var(--color-surface)">
+                        <div style="display:flex;align-items:flex-start;gap:12px">
+                          <div style="flex:1">
+                            <div style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent)">Entrenamiento · {{ entrenoDuracion }}</div>
+                            <div style="font-family:var(--font-heading);font-weight:800;font-size:19px;line-height:1.1;margin-top:4px">{{ entrenoTitulo }}</div>
+                          </div>
+                          <button onClick="{{ toggleEntreno }}" style="width:34px;height:34px;flex:0 0 auto;border:2px solid var(--color-divider);background: {{ entrenoChkBg }};color: {{ entrenoChkFg }};font-size:16px;font-weight:800;cursor:pointer;display:grid;place-items:center">✓</button>
+                        </div>
+                        <sc-for list="{{ entrenoBloques }}" as="b" hint-placeholder-count="3">
+                          <div style="margin-top:12px">
+                            <div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border-bottom:2px solid var(--color-divider);padding-bottom:4px">{{ b.t }}</div>
+                            <sc-for list="{{ b.e }}" as="linea" hint-placeholder-count="3">
+                              <div style="font-size:13px;padding:5px 0;border-bottom:1px solid var(--color-neutral-300);line-height:1.35">{{ linea }}</div>
+                            </sc-for>
+                          </div>
+                        </sc-for>
+                        <sc-for list="{{ entrenoClaves }}" as="c" hint-placeholder-count="2">
+                          <div style="font-size:12px;line-height:1.4;color:var(--color-accent-700);border-left:3px solid var(--color-accent);padding:4px 0 4px 10px;margin-top:8px">{{ c }}</div>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+
+                    <sc-for list="{{ ingestas }}" as="ing" hint-placeholder-count="5">
+                      <div style="border-bottom:2px solid var(--color-divider)">
+                        <div style="display:flex;align-items:center;gap:12px;padding:12px 18px 8px">
+                          <span style="font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:.02em;min-width:52px;color:var(--color-accent)">{{ ing.hora }}</span>
+                          <span style="flex:1;font-family:var(--font-heading);font-weight:800;font-size:17px;letter-spacing:-.01em">{{ ing.label }}</span>
+                          <button onClick="{{ ing.toggle }}" style="width:30px;height:30px;flex:0 0 auto;border:2px solid var(--color-divider);background: {{ ing.chkBg }};color: {{ ing.chkFg }};font-size:14px;font-weight:800;cursor:pointer;display:grid;place-items:center">✓</button>
+                        </div>
+                        <div style="padding:0 18px 12px 18px">
+                          <sc-for list="{{ ing.items }}" as="it" hint-placeholder-count="4">
+                            <div style="border-top:1px solid var(--color-neutral-300);padding:7px 0">
+                              <div style="display:flex;gap:10px;align-items:baseline">
+                                <span style="flex:1;font-size:14px;line-height:1.35">{{ it.n }}</span>
+                                <span style="font-size:12px;color:var(--color-neutral-600);white-space:nowrap;font-variant-numeric:tabular-nums">{{ it.c }}</span>
+                              </div>
+                              <sc-if value="{{ it.nota }}" hint-placeholder-val="{{ false }}">
+                                <div style="font-size:11px;color:var(--color-neutral-600);font-style:italic;margin-top:2px">{{ it.nota }}</div>
+                              </sc-if>
+                              <sc-if value="{{ it.tieneReceta }}" hint-placeholder-val="{{ false }}">
+                                <button class="btn btn-ghost" onClick="{{ it.toggle }}" style="padding:2px 0;font-size:11px;letter-spacing:.08em;text-transform:uppercase">{{ it.recetaLabel }}</button>
+                              </sc-if>
+                              <sc-if value="{{ it.abierta }}" hint-placeholder-val="{{ false }}">
+                                <div style="background:var(--color-surface);border:2px solid var(--color-divider);padding:12px;margin:6px 0 4px">
+                                  <div style="height:120px;margin-bottom:10px">
+                                    <image-slot id="{{ it.slotId }}" shape="rect" placeholder="Foto del plato"></image-slot>
+                                  </div>
+                                  <div style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600)">Ingredientes</div>
+                                  <sc-for list="{{ it.ing }}" as="x" hint-placeholder-count="4">
+                                    <div style="font-size:12.5px;padding:3px 0;border-bottom:1px solid var(--color-neutral-300);line-height:1.35">{{ x }}</div>
+                                  </sc-for>
+                                  <div style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:12px">Elaboración</div>
+                                  <sc-for list="{{ it.pasos }}" as="p" hint-placeholder-count="4">
+                                    <div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid var(--color-neutral-300)">
+                                      <span style="font-weight:800;font-size:11px;color:var(--color-accent);min-width:16px">{{ p.n }}</span>
+                                      <span style="font-size:12.5px;line-height:1.4">{{ p.t }}</span>
+                                    </div>
+                                  </sc-for>
+                                  <sc-if value="{{ it.notaReceta }}" hint-placeholder-val="{{ false }}">
+                                    <div style="font-size:12px;line-height:1.4;color:var(--color-accent-700);border-left:3px solid var(--color-accent);padding:4px 0 4px 10px;margin-top:10px">{{ it.notaReceta }}</div>
+                                  </sc-if>
+                                </div>
+                              </sc-if>
+                            </div>
+                          </sc-for>
+                        </div>
+                      </div>
+                    </sc-for>
+
+                    <sc-if value="{{ isVarA }}" hint-placeholder-val="{{ true }}">
+                      <div style="padding:14px 18px;border-bottom:2px solid var(--color-divider);background:var(--color-surface)">
+                        <div style="display:flex;align-items:flex-start;gap:12px">
+                          <div style="flex:1">
+                            <div style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent)">Entrenamiento · {{ entrenoDuracion }}</div>
+                            <div style="font-family:var(--font-heading);font-weight:800;font-size:19px;line-height:1.1;margin-top:4px">{{ entrenoTitulo }}</div>
+                          </div>
+                          <button onClick="{{ toggleEntreno }}" style="width:34px;height:34px;flex:0 0 auto;border:2px solid var(--color-divider);background: {{ entrenoChkBg }};color: {{ entrenoChkFg }};font-size:16px;font-weight:800;cursor:pointer;display:grid;place-items:center">✓</button>
+                        </div>
+                        <sc-for list="{{ entrenoBloques }}" as="b" hint-placeholder-count="3">
+                          <div style="margin-top:12px">
+                            <div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border-bottom:2px solid var(--color-divider);padding-bottom:4px">{{ b.t }}</div>
+                            <sc-for list="{{ b.e }}" as="linea" hint-placeholder-count="3">
+                              <div style="font-size:13px;padding:5px 0;border-bottom:1px solid var(--color-neutral-300);line-height:1.35">{{ linea }}</div>
+                            </sc-for>
+                          </div>
+                        </sc-for>
+                        <sc-for list="{{ entrenoClaves }}" as="c" hint-placeholder-count="2">
+                          <div style="font-size:12px;line-height:1.4;color:var(--color-accent-700);border-left:3px solid var(--color-accent);padding:4px 0 4px 10px;margin-top:8px">{{ c }}</div>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+
+                    <div style="padding:14px 18px 10px">
+                      <div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;border-bottom:2px solid var(--color-divider);padding-bottom:6px">Hábitos diarios</div>
+                      <sc-for list="{{ habitos }}" as="h" hint-placeholder-count="4">
+                        <div style="padding:8px 0;border-bottom:1px solid var(--color-neutral-300)">
+                          <div style="font-size:13.5px;font-weight:800">{{ h.t }}</div>
+                          <div style="font-size:12px;color:var(--color-neutral-700);line-height:1.4">{{ h.d }}</div>
+                        </div>
+                      </sc-for>
+                    </div>
+
+                    <div style="margin:6px 18px 22px;border:2px solid var(--color-divider);padding:12px;font-size:11.5px;line-height:1.5;color:var(--color-neutral-700)">
+                      El plan de comidas es la transcripción literal del plan del dietista-nutricionista. Las rutinas de ejercicio son una propuesta basada en el informe clínico: coméntalas con tu fisioterapeuta antes de empezar.
+                    </div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ isSemana }}" hint-placeholder-val="{{ false }}">
+                  <div>
+                    <sc-for list="{{ semana }}" as="d" hint-placeholder-count="7">
+                      <button onClick="{{ d.ir }}" style="display:block;width:100%;text-align:left;background: {{ d.bg }};border:0;border-bottom:2px solid var(--color-divider);border-left:6px solid {{ d.marca }};padding:14px 18px;cursor:pointer;color:var(--color-text);font-family:var(--font-body)">
+                        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+                          <span style="font-family:var(--font-heading);font-weight:800;font-size:20px;letter-spacing:-.01em">{{ d.dia }}</span>
+                          <span style="font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color: {{ d.tagFg }};background: {{ d.tagBg }};padding:3px 7px">{{ d.entreno }}</span>
+                        </div>
+                        <div style="font-size:12.5px;color:var(--color-neutral-700);margin-top:6px;line-height:1.4"><b style="color:var(--color-text)">Comida</b> · {{ d.comida }}</div>
+                        <div style="font-size:12.5px;color:var(--color-neutral-700);line-height:1.4"><b style="color:var(--color-text)">Cena</b> · {{ d.cena }}</div>
+                      </button>
+                    </sc-for>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ isPeso }}" hint-placeholder-val="{{ false }}">
+                  <div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:2px solid var(--color-divider)">
+                      <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+                        <div style="padding:12px 18px;border-right:1px solid var(--color-neutral-300);border-bottom:1px solid var(--color-neutral-300)">
+                          <div style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600)">{{ k.t }}</div>
+                          <div style="font-family:var(--font-heading);font-weight:800;font-size:26px;letter-spacing:-.02em;margin-top:2px;color: {{ k.color }};font-variant-numeric:tabular-nums">{{ k.v }}</div>
+                        </div>
+                      </sc-for>
+                    </div>
+
+                    <div style="padding:14px 18px;border-bottom:2px solid var(--color-divider)">
+                      <div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">Registrar peso</div>
+                      <div style="display:flex;gap:10px;align-items:flex-end">
+                        <div style="flex:1">
+                          <input type="text" inputmode="decimal" value="{{ pesoInput }}" onChange="{{ setPesoInput }}" style="width:100%;background:transparent;border:0;border-bottom:2px solid var(--color-divider);padding:6px 0;font-size:28px;font-family:var(--font-heading);font-weight:800;color:var(--color-text)">
+                        </div>
+                        <span style="font-size:14px;font-weight:800;padding-bottom:10px">kg</span>
+                        <button class="btn btn-primary" onClick="{{ guardarPeso }}" style="padding:12px 16px">Guardar</button>
+                      </div>
+                      <div style="font-size:11.5px;color:var(--color-neutral-600);margin-top:8px">{{ pesoAviso }}</div>
+                    </div>
+
+                    <div style="padding:14px 18px 8px;border-bottom:2px solid var(--color-divider)">
+                      <div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px">Evolución · 8 semanas</div>
+                      <svg viewBox="0 0 340 200" style="width:100%;height:190px;display:block;overflow:visible">
+                        <line x1="0" y1="{{ yObjetivo }}" x2="340" y2="{{ yObjetivo }}" stroke="var(--color-neutral-500)" stroke-width="1.5" stroke-dasharray="5 4"></line>
+                        <polyline points="{{ puntosDiario }}" fill="none" stroke="var(--color-neutral-400)" stroke-width="1.5"></polyline>
+                        <polyline points="{{ puntosMedia }}" fill="none" stroke="var(--color-accent)" stroke-width="2.5"></polyline>
+                        <circle cx="{{ ultimoX }}" cy="{{ ultimoY }}" r="4" fill="var(--color-accent)"></circle>
+                      </svg>
+                      <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--color-neutral-600);padding:8px 0 10px">
+                        <span>— Media 7 días</span><span>— Peso diario</span><span>-- Objetivo {{ objetivo }} kg</span>
+                      </div>
+                    </div>
+
+                    <div style="padding:12px 18px">
+                      <div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;border-bottom:2px solid var(--color-divider);padding-bottom:6px">Registros</div>
+                      <sc-for list="{{ registros }}" as="r" hint-placeholder-count="8">
+                        <div style="display:flex;align-items:baseline;gap:10px;padding:8px 0;border-bottom:1px solid var(--color-neutral-300)">
+                          <span style="flex:1;font-size:13.5px">{{ r.fecha }}</span>
+                          <span style="font-size:12px;color: {{ r.deltaColor }};font-variant-numeric:tabular-nums">{{ r.delta }}</span>
+                          <span style="font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;min-width:64px;text-align:right">{{ r.peso }}</span>
+                          <button onClick="{{ r.borrar }}" style="border:0;background:transparent;color:var(--color-neutral-600);font-size:16px;cursor:pointer;padding:0 2px">×</button>
+                        </div>
+                      </sc-for>
+                    </div>
+
+                    <div style="padding:12px 18px 24px">
+                      <div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;border-bottom:2px solid var(--color-divider);padding-bottom:6px">Objetivos del informe</div>
+                      <sc-for list="{{ objetivos }}" as="o" hint-placeholder-count="4">
+                        <div style="padding:8px 0;border-bottom:1px solid var(--color-neutral-300)">
+                          <div style="font-size:13.5px;font-weight:800">{{ o.t }}</div>
+                          <div style="font-size:12px;color:var(--color-neutral-700);line-height:1.4">{{ o.d }}</div>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ isCompra }}" hint-placeholder-val="{{ false }}">
+                  <div>
+                    <div style="padding:12px 18px;border-bottom:2px solid var(--color-divider)">
+                      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                        <span style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase">Días incluidos</span>
+                        <button class="btn btn-ghost" onClick="{{ toggleTodos }}" style="font-size:11px;letter-spacing:.08em;text-transform:uppercase">{{ todosLabel }}</button>
+                      </div>
+                      <div style="display:flex;flex-wrap:wrap;gap:6px">
+                        <sc-for list="{{ diasCompra }}" as="d" hint-placeholder-count="7">
+                          <button onClick="{{ d.toggle }}" style="border:2px solid var(--color-divider);background: {{ d.bg }};color: {{ d.fg }};font-family:var(--font-heading);font-weight:800;font-size:12px;padding:6px 10px;cursor:pointer">{{ d.corto }}</button>
+                        </sc-for>
+                      </div>
+                    </div>
+                    <div style="padding:4px 18px 24px">
+                      <sc-for list="{{ grupos }}" as="g" hint-placeholder-count="4">
+                        <div style="margin-top:16px">
+                          <div style="font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--color-accent);border-bottom:2px solid var(--color-divider);padding-bottom:5px">{{ g.categoria }}</div>
+                          <sc-for list="{{ g.items }}" as="v" hint-placeholder-count="4">
+                            <div style="display:flex;gap:10px;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--color-neutral-300)">
+                              <span style="flex:1;font-size:13.5px">{{ v.n }}</span>
+                              <span style="font-size:12.5px;color:var(--color-neutral-600);font-variant-numeric:tabular-nums">{{ v.cant }}</span>
+                            </div>
+                          </sc-for>
+                        </div>
+                      </sc-for>
+                      <div style="margin-top:20px;border:2px solid var(--color-divider);padding:12px;font-size:11.5px;line-height:1.5;color:var(--color-neutral-700)">
+                        Cantidades sumadas de las raciones del plan para los días marcados, incluyendo los ingredientes de cada receta. Añade margen en fruta y verdura y en formatos por envase.
+                      </div>
+                    </div>
+                  </div>
+                </sc-if>
+
+              </div>
+
+              <div style="flex:0 0 auto;display:grid;grid-template-columns:repeat(4,1fr);border-top:2px solid var(--color-divider);background:var(--color-bg)">
+                <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+                  <button onClick="{{ t.ir }}" style="background: {{ t.bg }};border:0;border-right:1px solid var(--color-neutral-300);padding:12px 0 22px;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color: {{ t.fg }}">{{ t.label }}</button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+        </div>
+      </div>
+    </div>
+
+    <div style="flex:1 1 760px;min-width:720px">
+      <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:12px">
+        <span style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase">Escritorio · panel del día</span>
+        <span style="font-size:11px;color:var(--color-neutral-600)">La misma sesión, en una sola vista</span>
+      </div>
+
+      <div style="border:2px solid var(--color-divider);background:var(--color-bg);box-shadow:var(--shadow-md)">
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:2px solid var(--color-divider)">
+          <div style="width:16px;height:16px;background:var(--color-accent)"></div>
+          <span style="font-family:var(--font-heading);font-weight:800;font-size:14px;letter-spacing:.02em">MISALUD</span>
+          <span style="flex:1"></span>
+          <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+            <button onClick="{{ t.ir }}" style="background:transparent;border:0;border-bottom:2px solid {{ t.marca }};padding:4px 2px;margin-left:16px;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color: {{ t.fgDesk }}">{{ t.label }}</button>
+          </sc-for>
+          <span style="width:2px;height:20px;background:var(--color-divider);margin:0 14px"></span>
+          <span style="font-size:12px;font-weight:800">{{ pacienteNombre }}</span>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1.15fr 1fr;border-bottom:2px solid var(--color-divider)">
+          <div style="padding:22px 24px;border-right:2px solid var(--color-divider)">
+            <div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent)">{{ fechaLarga }}</div>
+            <h1 style="font-size:56px;margin:6px 0 0;letter-spacing:-.035em;line-height:.95">{{ diaNombre }}</h1>
+            <div style="display:flex;align-items:baseline;gap:12px;margin-top:16px">
+              <span style="font-family:var(--font-heading);font-weight:800;font-size:34px;letter-spacing:-.02em">{{ pct }}%</span>
+              <span style="font-size:13px;color:var(--color-neutral-700)">{{ hechasTxt }} · {{ entrenoEstado }}</span>
+            </div>
+            <div style="display:flex;gap:4px;height:12px;margin-top:12px">
+              <sc-for list="{{ progresoBloques }}" as="b" hint-placeholder-count="6">
+                <div style="flex:1;background: {{ b.bg }};border:2px solid var(--color-divider)"></div>
+              </sc-for>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:20px">
+              <button class="btn btn-primary" onClick="{{ diaPrev }}" style="padding:10px 14px">‹ Día anterior</button>
+              <button class="btn btn-secondary" onClick="{{ diaNext }}" style="padding:10px 14px">Día siguiente ›</button>
+            </div>
+          </div>
+          <div style="height:290px;position:relative">
+            <image-slot id="misalud-hero" shape="rect" placeholder="Foto del plato principal de hoy (b/n)"></image-slot>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1.15fr 1fr">
+          <div style="padding:20px 24px;border-right:2px solid var(--color-divider)">
+            <div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;border-bottom:2px solid var(--color-divider);padding-bottom:6px">Las cinco ingestas</div>
+            <sc-for list="{{ ingestas }}" as="ing" hint-placeholder-count="5">
+              <div style="padding:12px 0;border-bottom:1px solid var(--color-neutral-300)">
+                <div style="display:flex;align-items:center;gap:12px">
+                  <span style="font-family:var(--font-heading);font-weight:800;font-size:12px;color:var(--color-accent);min-width:46px">{{ ing.hora }}</span>
+                  <span style="flex:1;font-family:var(--font-heading);font-weight:800;font-size:16px">{{ ing.label }}</span>
+                  <button onClick="{{ ing.toggle }}" style="width:26px;height:26px;border:2px solid var(--color-divider);background: {{ ing.chkBg }};color: {{ ing.chkFg }};font-size:13px;font-weight:800;cursor:pointer">✓</button>
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:0 18px;margin-top:6px;padding-left:58px">
+                  <sc-for list="{{ ing.items }}" as="it" hint-placeholder-count="4">
+                    <span style="font-size:12.5px;color:var(--color-neutral-700);line-height:1.6">{{ it.resumen }}</span>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div>
+            <div style="padding:20px 24px;border-bottom:2px solid var(--color-divider);background:var(--color-surface)">
+              <div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent)">Entrenamiento · {{ entrenoDuracion }}</div>
+              <div style="font-family:var(--font-heading);font-weight:800;font-size:22px;line-height:1.1;margin-top:4px">{{ entrenoTitulo }}</div>
+              <sc-for list="{{ entrenoBloques }}" as="b" hint-placeholder-count="3">
+                <div style="margin-top:12px">
+                  <div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border-bottom:2px solid var(--color-divider);padding-bottom:4px">{{ b.t }}</div>
+                  <sc-for list="{{ b.e }}" as="linea" hint-placeholder-count="3">
+                    <div style="font-size:13px;padding:4px 0;border-bottom:1px solid var(--color-neutral-300);line-height:1.35">{{ linea }}</div>
+                  </sc-for>
+                </div>
+              </sc-for>
+            </div>
+            <div style="padding:20px 24px">
+              <div style="display:flex;align-items:baseline;justify-content:space-between;border-bottom:2px solid var(--color-divider);padding-bottom:6px">
+                <span style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase">Peso</span>
+                <span style="font-size:12px;color:var(--color-neutral-600)">objetivo {{ objetivo }} kg</span>
+              </div>
+              <div style="display:flex;align-items:baseline;gap:14px;margin-top:10px">
+                <span style="font-family:var(--font-heading);font-weight:800;font-size:44px;letter-spacing:-.03em;font-variant-numeric:tabular-nums">{{ pesoActual }}</span>
+                <span style="font-size:14px;font-weight:800">kg</span>
+                <span style="font-size:13px;color:var(--color-accent);font-weight:800">{{ deltaTxt }}</span>
+              </div>
+              <svg viewBox="0 0 340 120" style="width:100%;height:120px;display:block;margin-top:8px">
+                <line x1="0" y1="{{ yObjetivoMini }}" x2="340" y2="{{ yObjetivoMini }}" stroke="var(--color-neutral-500)" stroke-width="1.5" stroke-dasharray="5 4"></line>
+                <polyline points="{{ puntosDiarioMini }}" fill="none" stroke="var(--color-neutral-400)" stroke-width="1.5"></polyline>
+                <polyline points="{{ puntosMediaMini }}" fill="none" stroke="var(--color-accent)" stroke-width="2.5"></polyline>
+              </svg>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:10px;border-top:2px solid var(--color-divider)">
+                <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+                  <div style="padding:8px 0;border-bottom:1px solid var(--color-neutral-300)">
+                    <div style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600)">{{ k.t }}</div>
+                    <div style="font-family:var(--font-heading);font-weight:800;font-size:18px;color: {{ k.color }};font-variant-numeric:tabular-nums">{{ k.v }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:24px;border-top:2px solid var(--color-divider);padding-top:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:24px">
+        <div>
+          <div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent)">Qué cambia</div>
+          <p style="font-size:12.5px;line-height:1.55;color:var(--color-neutral-700);margin-top:6px">Fuera las tarjetas redondeadas: la jerarquía la marcan reglas de 2 px y el tamaño de la tipografía. La hora de cada ingesta pasa a ser el ancla de lectura.</p>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent)">Progreso del día</div>
+          <p style="font-size:12.5px;line-height:1.55;color:var(--color-neutral-700);margin-top:6px">Nuevo: un porcentaje y seis bloques (5 ingestas + entreno) arriba del todo, para saber en dos segundos qué falta hoy.</p>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent)">Siguientes pasos</div>
+          <p style="font-size:12.5px;line-height:1.55;color:var(--color-neutral-700);margin-top:6px">Elegir variante A o B para «Hoy», definir el estado vacío de Peso y decidir si el selector de paciente vive en la cabecera o en Ajustes.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1680,&quot;height&quot;:1100},&quot;tema&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;claro&quot;,&quot;oscuro&quot;],&quot;default&quot;:&quot;claro&quot;,&quot;tsType&quot;:&quot;'claro' | 'oscuro'&quot;},&quot;variante&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;A&quot;,&quot;B&quot;],&quot;default&quot;:&quot;A&quot;,&quot;tsType&quot;:&quot;'A' | 'B'&quot;}}">
+const R = (ing, pasos, nota) => ({ ing, pasos, nota });
+
+const DESAYUNO = (prot) => ({ hora: '08:30', items: [
+  { n: 'Agua', c: '500 g (2 vasos)' },
+  { n: 'Café solo', c: '50 g (1 taza)' },
+  { n: 'Aceite de oliva', c: '14 g (1 cucharada)' },
+  { n: 'Aguacate', c: '25 g (3 lonchas)' },
+  { n: 'Pan integral de trigo', c: '50 g (1/5 barra)' },
+  prot,
+  { n: 'Naranja', c: '170 g (1 pequeña)' },
+]});
+
+const DIETA = [
+  { dia: 'Lunes', ingestas: {
+    desayuno: DESAYUNO({ n: 'Pechuga de pavo (fiambre)', c: '35 g (3 lonchas)' }),
+    tentempie: { hora: '11:00', items: [{ n: 'Plátano', c: '130 g (1 pequeño)' }] },
+    comida: { hora: '14:00', items: [
+      { n: 'Ensalada de pasta integral veraniega', r: R(
+        ['Macarrones integrales: 40 g', 'Pimiento rojo: 20 g (2 rodajas)', 'Tomate crudo: 45 g (3 rodajas)', 'Atún enlatado en agua: 30 g', 'Cebolla o cebolleta: 30 g', 'Aceite de oliva: 5 g', 'Vinagre: 5 g', 'Pimienta negra: al gusto'],
+        ['Cocer los macarrones 10 minutos, escurrir y reservar.', 'Lavar y trocear en dados la cebolla, el pimiento y el tomate.', 'Escurrir el atún y mezclar con las hortalizas y la pasta.', 'Preparar una vinagreta con aceite, pimienta y vinagre.', 'Emplatar y aliñar con la vinagreta.']) },
+      { n: 'Sardinas en aceite', c: '69 g (1/2 lata)' },
+      { n: 'Queso tipo Burgos con calcio', c: '75 g (1 tarrina)' },
+      { n: 'Melón', c: '150 g (1 cortada)' },
+    ]},
+    merienda: { hora: '17:30', items: [{ n: 'Yogur bio cremoso', c: '125 g (1 unidad)' }, { n: 'Arándanos', c: '25 g (10 unidades)' }] },
+    cena: { hora: '20:00', items: [
+      { n: 'Agua', c: '500 g (2 vasos)' },
+      { n: 'Huevos escalfados sobre alcachofas y setas', r: R(
+        ['Huevo de gallina: 60 g (1 talla M)', 'Champiñón o seta: 100 g', 'Aceite de oliva: 10 g', 'Alcachofa: 130 g (1 mediana)', 'Ajo: 5 g (1 diente)', 'Perejil: al gusto'],
+        ['Limpiar las alcachofas y escaldar los corazones 3 minutos. Escurrir y laminar.', 'Preparar un majado con aceite, ajo y perejil picado.', 'Saltear las setas laminadas; añadir las alcachofas y pintar con el majado.', 'Escalfar el huevo 3 minutos en agua con un chorro de vinagre.', 'Emplatar el salteado y colocar encima el huevo escalfado.']) },
+      { n: 'Almendra sin cáscara', c: '15 g (10 almendras)' },
+    ]},
+  }},
+  { dia: 'Martes', ingestas: {
+    desayuno: DESAYUNO({ n: 'Queso cottage', c: '40 g (2 cucharadas)' }),
+    tentempie: { hora: '11:00', items: [{ n: 'Avellana sin cáscara', c: '20 g (10 unidades)' }, { n: 'Kéfir bebible', c: '100 g (1 pequeño)' }] },
+    comida: { hora: '14:00', items: [
+      { n: 'Judías verdes con jamón', r: R(
+        ['Judía verde: 200 g', 'Jamón serrano: 40 g (4 lonchas)', 'Cebolla o cebolleta: 50 g', 'Aceite de oliva: 5 g'],
+        ['Lavar las judías, quitar los extremos y trocear.', 'Cocer en agua hirviendo con sal 20 minutos.', 'Saltear la cebolla picada; añadir el jamón en dados y rehogar 1 minuto.', 'Incorporar las judías escurridas y saltear el conjunto.']) },
+      { n: 'Rodaballo a la plancha', c: '180 g' },
+      { n: 'Ciruela', c: '75 g (1 mediana)' },
+    ]},
+    cena: { hora: '20:00', items: [
+      { n: 'Agua', c: '500 g (2 vasos)' },
+      { n: 'Yogur bio cremoso', c: '125 g (1 unidad)' },
+      { n: 'Fresa o fresón', c: '60 g (3 unidades)' },
+      { n: 'Almendra sin cáscara', c: '30 g (20 almendras)', nota: 'El plan lo lista como dos raciones de 15 g' },
+    ]},
+  }},
+  { dia: 'Miércoles', ingestas: {
+    desayuno: DESAYUNO({ n: 'Pechuga de pavo (fiambre)', c: '35 g (3 lonchas)' }),
+    tentempie: { hora: '11:00', items: [{ n: 'Plátano', c: '130 g (1 pequeño)' }] },
+    comida: { hora: '14:00', items: [
+      { n: 'Ensalada de patata con huevo duro y atún', r: R(
+        ['Patata: 100 g (1 pequeña)', 'Cebolla o cebolleta: 30 g', 'Huevo de gallina: 55 g', 'Atún en aceite: 40 g', 'Pimiento rojo: 50 g', 'Aceite de oliva: 5 g', 'Vinagre: 5 g'],
+        ['Cocer la patata troceada 20 minutos.', 'Picar la cebolla y el pimiento en dados pequeños.', 'Cocer el huevo 10 minutos.', 'Mezclar la patata con las hortalizas, el huevo picado y el atún.', 'Aliñar con aceite y vinagre.']) },
+      { n: 'Queso tipo Burgos con calcio', c: '40 g (1/2 tarrina)' },
+      { n: 'Melón', c: '150 g (1 cortada)' },
+    ]},
+    merienda: { hora: '17:30', items: [{ n: 'Yogur bio cremoso', c: '125 g (1 unidad)' }, { n: 'Arándanos', c: '25 g (10 unidades)' }] },
+    cena: { hora: '20:00', items: [
+      { n: 'Agua', c: '500 g (2 vasos)' },
+      { n: 'Ensalada de rúcula, tomate y cebolla', r: R(
+        ['Rúcula: 40 g', 'Tomate crudo: 150 g', 'Cebolla o cebolleta: 50 g', 'Aceite de oliva: 8 g'],
+        ['Lavar y trocear el tomate. Cortar la cebolla en juliana.', 'Emplatar la rúcula, colocar encima el tomate con la cebolla y aliñar.']) },
+      { n: 'Sardinas en aceite', c: '85 g (1 lata)' },
+      { n: 'Almendra sin cáscara', c: '15 g (10 almendras)' },
+    ]},
+  }},
+  { dia: 'Jueves', ingestas: {
+    desayuno: DESAYUNO({ n: 'Queso cottage', c: '20 g (1 cucharada)' }),
+    tentempie: { hora: '11:00', items: [{ n: 'Avellana sin cáscara', c: '20 g (10 unidades)' }, { n: 'Kéfir bebible', c: '100 g (1 pequeño)' }] },
+    comida: { hora: '14:00', items: [
+      { n: 'Ensalada de garbanzos veraniega', r: R(
+        ['Garbanzos cocidos: 150 g', 'Tomate crudo: 75 g', 'Pepino: 75 g', 'Atún en aceite: 55 g', 'Aceituna verde: 16 g', 'Vinagre de Módena: 20 g', 'Aceite de oliva: 5 g'],
+        ['Lavar los garbanzos bajo agua fría y escurrir.', 'Cortar el tomate en dados y el pepino pelado en trozos similares.', 'Añadir tomate, pepino y aceitunas a los garbanzos.', 'Desmigar el atún e incorporar.', 'Aliñar con aceite y vinagre y remover bien.']) },
+      { n: 'Queso tipo Burgos con calcio', c: '40 g (1/2 tarrina)' },
+      { n: 'Cereza', c: '75 g (8 unidades)' },
+    ]},
+    cena: { hora: '20:00', items: [
+      { n: 'Agua', c: '500 g (2 vasos)' },
+      { n: 'Yogur bio cremoso', c: '125 g (1 unidad)' },
+      { n: 'Fresa o fresón', c: '60 g (3 unidades)' },
+      { n: 'Almendra sin cáscara', c: '15 g (10 almendras)' },
+    ]},
+  }},
+  { dia: 'Viernes', ingestas: {
+    desayuno: DESAYUNO({ n: 'Pechuga de pavo (fiambre)', c: '35 g (3 lonchas)' }),
+    tentempie: { hora: '11:00', items: [{ n: 'Avellana sin cáscara', c: '20 g (10 unidades)' }, { n: 'Kéfir bebible', c: '100 g (1 pequeño)' }] },
+    comida: { hora: '14:00', items: [
+      { n: 'Coliflor con patatas', r: R(
+        ['Coliflor: 150 g', 'Patata: 100 g', 'Aceite de oliva: 5 g', 'Sal común: 1 g'],
+        ['Limpiar y trocear la coliflor e incorporar a agua hirviendo con sal.', 'Añadir la patata cascada en trozos.', 'Cocer 20-30 minutos, sacar y escurrir.', 'Emplatar y añadir el aceite crudo por encima.'],
+        'Se puede calentar el aceite con láminas de ajo y una cucharada de pimentón dulce antes de servir.') },
+      { n: 'Pollo asado en su jugo', c: '170 g (muslo)' },
+      { n: 'Melón', c: '150 g (1 cortada)' },
+    ]},
+    cena: { hora: '20:00', items: [
+      { n: 'Agua', c: '500 g (2 vasos)' },
+      { n: 'Parrillada de calabacín y tomate', c: '190 g' },
+      { n: 'Tosta integral de guacamole con salmón y huevo poché', r: R(
+        ['Pan integral de trigo: 40 g', 'Guacamole: 20 g', 'Salmón ahumado: 20 g', 'Huevo de gallina: 60 g'],
+        ['Cascar el huevo en una taza y reservar.', 'Hervir agua con un chorro de vinagre y hacer un remolino.', 'Escalfar el huevo 3 minutos en el centro del remolino.', 'Untar el pan con guacamole, colocar el salmón y encima el huevo poché.']) },
+      { n: 'Almendra sin cáscara', c: '15 g (10 almendras)' },
+    ]},
+  }},
+  { dia: 'Sábado', ingestas: {
+    desayuno: DESAYUNO({ n: 'Queso cottage', c: '20 g (1 cucharada)' }),
+    comida: { hora: '14:00', items: [
+      { n: 'Agua Vichy Catalán (con gas)', c: '100 g' },
+      { n: 'Berberechos al natural', c: '65 g (1 lata)' },
+      { n: 'Ensalada de espinacas y cherry con sepia a la plancha', r: R(
+        ['Sepia: 250 g', 'Espinaca: 50 g', 'Tomate crudo: 75 g', 'Aceite de oliva: 8 g', 'Vinagre de Módena: 5 g', 'Semillas de sésamo: 5 g'],
+        ['Asar en la plancha caliente la sepia entera y limpia.', 'Mezclar los brotes de espinaca con los tomates cherry y aliñar.', 'Emplatar la ensalada con la sepia al lado y espolvorear sésamo.']) },
+      { n: 'Pan integral de trigo', c: '35 g (1 rebanada)' },
+      { n: 'Ciruela', c: '75 g (1 mediana)' },
+    ]},
+    cena: { hora: '20:00', items: [
+      { n: 'Agua', c: '500 g (2 vasos)' },
+      { n: 'Yogur bio cremoso', c: '125 g (1 unidad)' },
+      { n: 'Frambuesa', c: '45 g (15 unidades)' },
+      { n: 'Avellana sin cáscara', c: '20 g (10 unidades)' },
+    ]},
+  }},
+  { dia: 'Domingo', ingestas: {
+    desayuno: DESAYUNO({ n: 'Jamón ibérico', c: '15 g (1 loncha)' }),
+    comida: { hora: '14:00', items: [
+      { n: 'Agua Vichy Catalán (con gas)', c: '100 g' },
+      { n: 'Guisantes con jamón', r: R(
+        ['Guisante fresco: 80 g', 'Jamón serrano: 45 g', 'Cebolla blanca: 75 g', 'Aceite de oliva: 5 g'],
+        ['Cocer los guisantes 20 minutos, escurrir y reservar.', 'Pochar la cebolla troceada; añadir el jamón en dados y rehogar.', 'Incorporar los guisantes y mezclar unos minutos.']) },
+      { n: 'Tortilla de cebolla y bacalao ahumado', c: '230 g' },
+      { n: 'Cereza', c: '75 g (8 unidades)' },
+    ]},
+    cena: { hora: '20:00', items: [
+      { n: 'Agua', c: '500 g (2 vasos)' },
+      { n: 'Yogur bio cremoso', c: '125 g (1 unidad)' },
+      { n: 'Frambuesa', c: '45 g (15 unidades)' },
+      { n: 'Avellana sin cáscara', c: '20 g (10 unidades)' },
+    ]},
+  }},
+];
+
+const ENTRENO = [
+  { titulo: 'Fuerza A · tren inferior y tirón', duracion: '35 min', tipo: 'fuerza', corto: 'Fuerza A', bloques: [
+    { t: 'Calentamiento (5 min)', e: ['Gato-camello 8 repeticiones', 'Círculos de cadera 10 por lado', 'Banda elástica: aperturas de hombro 15 rep.'] },
+    { t: 'Principal (25 min)', e: ['Sentadilla a banco · 3 × 10-12', 'Peso muerto rumano con mancuernas · 3 × 10', 'Remo a un brazo · 3 × 12 por lado', 'Zancada estática con apoyo · 2 × 10', 'Puente de glúteo · 3 × 12', 'Elevación de talones · 2 × 15'] },
+    { t: 'Vuelta a la calma (5 min)', e: ['Isquiotibiales, psoas y dorsal, 30 s cada uno'] },
+  ], claves: ['Exhalar siempre al empujar o tirar. Si aguantas el aire, baja el peso.', 'Deja 2-3 repeticiones en recámara (esfuerzo 7/10).'] },
+  { titulo: 'Pilates', duracion: '50 min', tipo: 'movilidad', corto: 'Pilates', bloques: [
+    { t: 'Sesión dirigida', e: ['Avisa al instructor de la tendinitis y de la hernia de hiato.'] },
+  ], claves: ['Plancha en antebrazos en lugar de plancha alta.', 'Evita inversiones y roll-over: empeoran el reflujo.'] },
+  { titulo: 'Fuerza B · empuje y core', duracion: '35 min', tipo: 'fuerza', corto: 'Fuerza B', bloques: [
+    { t: 'Calentamiento (5 min)', e: ['Movilidad de hombro con banda 10 rep.', 'Sentadilla sin carga 10 rep.', 'Rotaciones dorsales 8 por lado'] },
+    { t: 'Principal (25 min)', e: ['Press inclinado con mancuernas · 3 × 10', 'Sentadilla búlgara con apoyo · 3 × 8', 'Jalón al pecho con banda · 3 × 12', 'Face pull con banda · 3 × 15', 'Plancha en antebrazos · 3 × 20-30 s', 'Pallof press · 2 × 10 por lado'] },
+    { t: 'Vuelta a la calma (5 min)', e: ['Pectoral en marco de puerta y cuádriceps, 30 s'] },
+  ], claves: ['Nada por encima de la cabeza hasta que desaparezcan los mareos.', 'Core en antiextensión y antirrotación: sin abdominales clásicos.'] },
+  { titulo: 'Natación', duracion: '45 min', tipo: 'cardio', corto: 'Natación', bloques: [
+    { t: 'Sesión', e: ['10 min de técnica suave', '8 × 50 m con 20 s de descanso', '10 min de nado continuo a ritmo bajo', '5 min de vuelta a la calma'] },
+  ], claves: ['Alterna estilos para no cargar el hombro.', 'Deja pasar 2 h desde la comida.'] },
+  { titulo: 'Caminata rápida + movilidad', duracion: '50 min', tipo: 'cardio', corto: 'Caminata', bloques: [
+    { t: 'Caminata (40 min)', e: ['Ritmo vivo, capaz de hablar pero no de cantar.'] },
+    { t: 'Impacto óseo (opcional)', e: ['2 × 1 min de trote muy suave, si no hay molestias.'] },
+    { t: 'Movilidad (10 min)', e: ['Cadera, dorsal y estiramiento de gemelo.'] },
+  ], claves: ['El impacto ligero frena la osteopenia; introdúcelo poco a poco.'] },
+  { titulo: 'Caminata / aire libre', duracion: '60 min', tipo: 'cardio', corto: 'Aire libre', bloques: [
+    { t: 'Antes de salir (10 min)', e: ['Movilidad de cadera y dorsal, activación de glúteo.'] },
+    { t: 'Actividad', e: ['Paseo, senderismo o caminata continua a ritmo cómodo.'] },
+  ], claves: ['Lleva el tentempié previsto.'] },
+  { titulo: 'Caminata larga y estiramientos', duracion: '60 min', tipo: 'movilidad', corto: 'Recuperación', bloques: [
+    { t: 'Caminata (50 min)', e: ['Ritmo cómodo, en compañía si es posible.'] },
+    { t: 'Estiramientos (10 min)', e: ['Cadena posterior completa, 30 s por posición.'] },
+  ], claves: ['Día de recuperación activa: moverse, no rendir.'] },
+];
+
+const HABITOS = [
+  { t: 'Aceite de oliva virgen extra', d: 'Más de 3 cucharadas al día repartidas entre las ingestas.' },
+  { t: 'Agua', d: 'Unos 2 L al día, sobre todo fuera de las comidas.' },
+  { t: 'Agua con gas bicarbonatada', d: 'Tipo Vichy Catalán, para el reflujo. Evita bebidas azucaradas.' },
+  { t: 'Cena temprano', d: 'Cenar a las 20:00 y no tumbarse hasta 2-3 h después.' },
+  { t: 'Romper el sedentarismo', d: 'Levantarse 3 minutos cada hora de oficina.' },
+  { t: 'Entrenar en postabsortivo', d: '2-3 h después de comer, nunca justo tras una ingesta.' },
+];
+
+const OBJETIVOS = [
+  { t: 'Peso', d: 'Bajar desde 66,5 kg (03/06/2026). Un 8-10 % en 6 meses sitúa el objetivo en 60 kg.' },
+  { t: 'Grasa corporal', d: 'Por debajo del 28 % (partida: 37,4 %).' },
+  { t: 'Grasa visceral', d: 'Por debajo de 100 cm² (partida: 114,3 cm²).' },
+  { t: 'Metabolismo basal', d: 'Subirlo desde 1270 kcal con trabajo de fuerza.' },
+  { t: 'Colesterol HDL', d: 'Aumentarlo (partida: 45 mg/dl, bajo).' },
+  { t: 'Síntomas digestivos', d: 'Reducir pirosis, regurgitación y distensión abdominal.' },
+];
+
+const KEYS = ['desayuno', 'tentempie', 'comida', 'merienda', 'cena'];
+const NOMBRES = { desayuno: 'Desayuno', tentempie: 'Tentempié', comida: 'Comida', merienda: 'Merienda', cena: 'Cena' };
+const DIAS_CORTOS = ['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB', 'DOM'];
+const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+
+const CATS = [
+  ['Verdura y fruta', ['tomate', 'pimiento', 'cebolla', 'melón', 'naranja', 'plátano', 'ciruela', 'cereza', 'fresa', 'frambuesa', 'arándano', 'judía', 'coliflor', 'patata', 'calabacín', 'guisante', 'espinaca', 'rúcula', 'pepino', 'alcachofa', 'champiñón', 'aguacate', 'ajo', 'perejil', 'guacamole', 'aceituna', 'parrillada']],
+  ['Pescado y marisco', ['atún', 'sardina', 'rodaballo', 'sepia', 'berberecho', 'salmón', 'bacalao']],
+  ['Carne', ['pavo', 'jamón', 'pollo']],
+  ['Huevos y lácteos', ['huevo', 'queso', 'yogur', 'kéfir', 'tortilla']],
+  ['Despensa', ['pan', 'macarrones', 'pasta', 'garbanzo', 'aceite', 'vinagre', 'almendra', 'avellana', 'sésamo', 'sal', 'pimienta', 'café', 'agua', 'ensalada', 'tosta', 'coliflor con']],
+];
+
+const PACIENTES = [
+  { id: 'jesus', nombre: 'Jesús', inicial: 66.5, objetivo: 60, ritmo: 0.052 },
+  { id: 'ana', nombre: 'Ana', inicial: 72.3, objetivo: 65, ritmo: 0.041 },
+];
+
+const fmt = (n) => n.toFixed(1).replace('.', ',');
+
+function serie(p) {
+  const out = [];
+  const inicio = new Date(2026, 5, 3);
+  for (let i = 0; i <= 52; i++) {
+    const d = new Date(inicio.getTime() + i * 86400000);
+    const ruido = Math.sin(i * 1.7) * 0.32 + Math.sin(i * 0.6) * 0.24;
+    out.push({ fecha: d, peso: Math.round((p.inicial - p.ritmo * i + ruido) * 10) / 10 });
+  }
+  return out;
+}
+
+class Component extends DCLogic {
+  state = {
+    tema: this.props.tema || 'claro',
+    pacienteIdx: 0,
+    variante: this.props.variante || 'A',
+    pantalla: 'hoy',
+    dia: 4,
+    hechas: { '4': { comida: true, desayuno: true, tentempie: true } },
+    entrenos: {},
+    abierta: null,
+    pesos: null,
+    pesoInput: '65,4',
+    compra: [0, 1, 2],
+    aviso: 'Pésate en ayunas, después del baño y sin ropa.',
+  };
+
+  componentDidMount() {
+    document.body.setAttribute('data-tema', this.state.tema);
+    this.setState({ pesos: serie(PACIENTES[0]) });
+  }
+
+  setTema(t) {
+    document.body.setAttribute('data-tema', t);
+    this.setState({ tema: t });
+  }
+
+  pesosActuales() {
+    return this.state.pesos || serie(PACIENTES[this.state.pacienteIdx]);
+  }
+
+  media7(arr, i) {
+    const desde = Math.max(0, i - 6);
+    const trozo = arr.slice(desde, i + 1);
+    return trozo.reduce((a, b) => a + b.peso, 0) / trozo.length;
+  }
+
+  renderVals() {
+    const s = this.state;
+    const P = PACIENTES[s.pacienteIdx];
+    const dia = DIETA[s.dia];
+    const ent = ENTRENO[s.dia];
+    const hechas = s.hechas[String(s.dia)] || {};
+    const entrenoHecho = !!s.entrenos[String(s.dia)];
+    const acento = 'var(--color-accent)';
+    const on = { bg: acento, fg: 'var(--color-bg)' };
+    const off = { bg: 'transparent', fg: 'transparent' };
+
+    const claves = KEYS.filter((k) => dia.ingestas[k]);
+    const nHechas = claves.filter((k) => hechas[k]).length + (entrenoHecho ? 1 : 0);
+    const total = claves.length + 1;
+
+    const ingestas = claves.map((k) => {
+      const ing = dia.ingestas[k];
+      const marcada = !!hechas[k];
+      return {
+        key: k,
+        label: NOMBRES[k],
+        hora: ing.hora,
+        chkBg: marcada ? on.bg : off.bg,
+        chkFg: marcada ? on.fg : off.fg,
+        toggle: () => this.setState((st) => {
+          const cur = { ...(st.hechas[String(st.dia)] || {}) };
+          cur[k] = !cur[k];
+          return { hechas: { ...st.hechas, [String(st.dia)]: cur } };
+        }),
+        items: ing.items.map((it, idx) => {
+          const id = s.dia + '-' + k + '-' + idx;
+          return {
+            n: it.n,
+            c: it.c || (it.r ? 'receta' : ''),
+            nota: it.nota || '',
+            resumen: it.c ? it.n + ' · ' + it.c : it.n,
+            tieneReceta: !!it.r,
+            abierta: s.abierta === id,
+            recetaLabel: s.abierta === id ? '− Cerrar receta' : '+ Ver receta',
+            slotId: 'plato-' + id,
+            ing: it.r ? it.r.ing : [],
+            pasos: it.r ? it.r.pasos.map((t, i) => ({ n: String(i + 1), t })) : [],
+            notaReceta: it.r && it.r.nota ? it.r.nota : '',
+            toggle: () => this.setState((st) => ({ abierta: st.abierta === id ? null : id })),
+          };
+        }),
+      };
+    });
+
+    const progresoBloques = [];
+    claves.forEach((k) => progresoBloques.push({ bg: hechas[k] ? acento : 'transparent' }));
+    progresoBloques.push({ bg: entrenoHecho ? acento : 'transparent' });
+
+    const semana = DIETA.map((d, i) => {
+      const e = ENTRENO[i];
+      const fuerza = e.tipo === 'fuerza';
+      const nombre = (key) => {
+        const g = d.ingestas[key];
+        if (!g) return '—';
+        const principal = g.items.find((x) => x.r) || g.items.find((x) => x.n !== 'Agua');
+        return principal ? principal.n : '—';
+      };
+      return {
+        dia: d.dia,
+        entreno: e.corto,
+        comida: nombre('comida'),
+        cena: nombre('cena'),
+        bg: i === s.dia ? 'var(--color-surface)' : 'transparent',
+        marca: i === s.dia ? acento : 'transparent',
+        tagBg: fuerza ? acento : 'var(--color-neutral-200)',
+        tagFg: fuerza ? 'var(--color-bg)' : 'var(--color-text)',
+        ir: () => this.setState({ dia: i, pantalla: 'hoy' }),
+      };
+    });
+
+    const pesos = this.pesosActuales();
+    const n = pesos.length;
+    const ultimo = pesos[n - 1];
+    const media = this.media7(pesos, n - 1);
+    const mediaPrev = n > 7 ? this.media7(pesos, n - 8) : media;
+    const delta = ultimo.peso - P.inicial;
+    const falta = ultimo.peso - P.objetivo;
+    const ritmoSem = media - mediaPrev;
+
+    const vals = pesos.map((p) => p.peso);
+    const min = Math.min(...vals, P.objetivo) - 0.6;
+    const max = Math.max(...vals) + 0.6;
+    const px = (i, W) => (i / (n - 1)) * W;
+    const py = (v, H) => H - ((v - min) / (max - min)) * H;
+    const linea = (fn, W, H) => pesos.map((p, i) => px(i, W).toFixed(1) + ',' + fn(p, i, H).toFixed(1)).join(' ');
+    const diario = (W, H) => linea((p, i, h) => py(p.peso, h), W, H);
+    const mediaL = (W, H) => linea((p, i, h) => py(this.media7(pesos, i), h), W, H);
+
+    const kpiColor = (v) => (v < 0 ? acento : 'var(--color-text)');
+    const kpis = [
+      { t: 'Actual', v: fmt(ultimo.peso) + ' kg', color: 'var(--color-text)' },
+      { t: 'Media 7 d', v: fmt(media) + ' kg', color: 'var(--color-text)' },
+      { t: 'Desde el inicio', v: (delta > 0 ? '+' : '') + fmt(delta) + ' kg', color: kpiColor(delta) },
+      { t: 'Hasta objetivo', v: fmt(falta) + ' kg', color: 'var(--color-text)' },
+    ];
+
+    const registros = pesos.slice().reverse().slice(0, 14).map((p, i, arr) => {
+      const prev = arr[i + 1];
+      const d = prev ? p.peso - prev.peso : null;
+      return {
+        fecha: p.fecha.getDate() + ' ' + MESES[p.fecha.getMonth()].slice(0, 3),
+        peso: fmt(p.peso) + ' kg',
+        delta: d === null ? '' : (d > 0 ? '+' : '') + fmt(d),
+        deltaColor: d !== null && d < 0 ? acento : 'var(--color-neutral-600)',
+        borrar: () => this.setState((st) => ({ pesos: (st.pesos || pesos).filter((x) => x.fecha.getTime() !== p.fecha.getTime()) })),
+      };
+    });
+
+    const sel = s.compra;
+    const acc = {};
+    sel.forEach((di) => {
+      const d = DIETA[di];
+      KEYS.forEach((k) => {
+        const g = d.ingestas[k];
+        if (!g) return;
+        g.items.forEach((it) => {
+          const fuentes = it.r ? it.r.ing.map((x) => ({ n: x.split(':')[0], c: x.split(':')[1] || '' })) : [{ n: it.n, c: it.c || '' }];
+          fuentes.forEach((f) => {
+            const m = /([\d.,]+)\s*g/.exec(f.c || '');
+            const g2 = m ? parseFloat(m[1].replace(',', '.')) : 0;
+            const key = f.n.trim();
+            if (!acc[key]) acc[key] = { g: 0, veces: 0 };
+            acc[key].g += g2;
+            acc[key].veces += 1;
+          });
+        });
+      });
+    });
+
+    const grupos = CATS.map(([categoria, kws]) => ({
+      categoria,
+      items: Object.keys(acc)
+        .filter((nombre) => kws.some((kw) => nombre.toLowerCase().includes(kw)))
+        .sort()
+        .map((nombre) => ({ n: nombre, cant: acc[nombre].g ? Math.round(acc[nombre].g) + ' g' : acc[nombre].veces + ' ración' + (acc[nombre].veces > 1 ? 'es' : '') })),
+    })).filter((g) => g.items.length);
+
+    const fecha = new Date(2026, 6, 20 + s.dia);
+    const tabs = [
+      ['hoy', 'Hoy'], ['semana', 'Semana'], ['peso', 'Peso'], ['compra', 'Compra'],
+    ].map(([id, label]) => ({
+      label,
+      bg: s.pantalla === id ? acento : 'transparent',
+      fg: s.pantalla === id ? 'var(--color-bg)' : 'var(--color-neutral-700)',
+      fgDesk: s.pantalla === id ? 'var(--color-text)' : 'var(--color-neutral-600)',
+      marca: s.pantalla === id ? acento : 'transparent',
+      ir: () => this.setState({ pantalla: id }),
+    }));
+
+    return {
+      pacienteNombre: P.nombre,
+      pacientes: PACIENTES.map((p, i) => ({
+        nombre: p.nombre,
+        bg: i === s.pacienteIdx ? acento : 'transparent',
+        fg: i === s.pacienteIdx ? 'var(--color-bg)' : 'var(--color-text)',
+        pick: () => this.setState({ pacienteIdx: i, pesos: serie(p) }),
+      })),
+      temaLabel: s.tema === 'claro' ? 'Modo oscuro' : 'Modo claro',
+      toggleTema: () => this.setTema(s.tema === 'claro' ? 'oscuro' : 'claro'),
+      variante: s.variante,
+      varianteNombre: s.variante === 'A' ? 'comidas primero' : 'entreno primero',
+      toggleVariante: () => this.setState({ variante: s.variante === 'A' ? 'B' : 'A' }),
+      isVarA: s.variante === 'A',
+      isVarB: s.variante === 'B',
+      isLogin: s.pantalla === 'login',
+      isApp: s.pantalla !== 'login',
+      isHoy: s.pantalla === 'hoy',
+      isSemana: s.pantalla === 'semana',
+      isPeso: s.pantalla === 'peso',
+      isCompra: s.pantalla === 'compra',
+      tituloPantalla: s.pantalla === 'hoy' ? 'Hoy' : s.pantalla === 'semana' ? 'Semana' : s.pantalla === 'peso' ? 'Peso' : 'Compra',
+      entrar: () => this.setState({ pantalla: 'hoy' }),
+      salir: () => this.setState({ pantalla: 'login' }),
+      diaNombre: dia.dia,
+      fechaLarga: fecha.getDate() + ' de ' + MESES[fecha.getMonth()] + ' de ' + fecha.getFullYear(),
+      diaPrev: () => this.setState((st) => ({ dia: (st.dia + 6) % 7, abierta: null })),
+      diaNext: () => this.setState((st) => ({ dia: (st.dia + 1) % 7, abierta: null })),
+      pct: Math.round((nHechas / total) * 100),
+      hechasTxt: nHechas + ' de ' + total + ' completado' + (nHechas === 1 ? '' : 's'),
+      progresoBloques,
+      ingestas,
+      entrenoTitulo: ent.titulo,
+      entrenoDuracion: ent.duracion,
+      entrenoBloques: ent.bloques,
+      entrenoClaves: ent.claves || [],
+      entrenoEstado: entrenoHecho ? 'entreno hecho' : 'entreno pendiente',
+      entrenoChkBg: entrenoHecho ? on.bg : off.bg,
+      entrenoChkFg: entrenoHecho ? on.fg : off.fg,
+      toggleEntreno: () => this.setState((st) => ({ entrenos: { ...st.entrenos, [String(st.dia)]: !st.entrenos[String(st.dia)] } })),
+      habitos: HABITOS,
+      objetivos: OBJETIVOS,
+      semana,
+      kpis,
+      registros,
+      objetivo: fmt(P.objetivo),
+      pesoActual: fmt(ultimo.peso),
+      deltaTxt: (delta > 0 ? '+' : '') + fmt(delta) + ' kg desde el inicio · ritmo ' + (ritmoSem > 0 ? '+' : '') + fmt(ritmoSem) + ' kg/sem',
+      pesoInput: s.pesoInput,
+      setPesoInput: (e) => this.setState({ pesoInput: e.target.value }),
+      guardarPeso: () => {
+        const v = parseFloat(String(s.pesoInput).replace(',', '.'));
+        if (!v || v < 30 || v > 200) { this.setState({ aviso: 'Introduce un peso entre 30 y 200 kg.' }); return; }
+        const arr = this.pesosActuales().slice();
+        const fechaNueva = new Date(arr[arr.length - 1].fecha.getTime() + 86400000);
+        arr.push({ fecha: fechaNueva, peso: Math.round(v * 10) / 10 });
+        this.setState({ pesos: arr, aviso: 'Guardado ' + fmt(v) + ' kg · ' + fechaNueva.getDate() + ' ' + MESES[fechaNueva.getMonth()] });
+      },
+      pesoAviso: s.aviso,
+      puntosDiario: diario(340, 200),
+      puntosMedia: mediaL(340, 200),
+      yObjetivo: py(P.objetivo, 200).toFixed(1),
+      ultimoX: px(n - 1, 340).toFixed(1),
+      ultimoY: py(ultimo.peso, 200).toFixed(1),
+      puntosDiarioMini: diario(340, 120),
+      puntosMediaMini: mediaL(340, 120),
+      yObjetivoMini: py(P.objetivo, 120).toFixed(1),
+      diasCompra: DIAS_CORTOS.map((corto, i) => ({
+        corto,
+        bg: sel.includes(i) ? acento : 'transparent',
+        fg: sel.includes(i) ? 'var(--color-bg)' : 'var(--color-text)',
+        toggle: () => this.setState((st) => ({ compra: st.compra.includes(i) ? st.compra.filter((x) => x !== i) : st.compra.concat(i).sort() })),
+      })),
+      todosLabel: sel.length === 7 ? 'Ninguno' : 'Todos',
+      toggleTodos: () => this.setState((st) => ({ compra: st.compra.length === 7 ? [] : [0, 1, 2, 3, 4, 5, 6] })),
+      grupos,
+      tabs,
+    };
+  }
+}
+
+</script>
+</body>
+</html>

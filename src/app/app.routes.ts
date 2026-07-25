@@ -12,7 +12,10 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./shell/shell').then((m) => m.Shell),
     children: [
-      { path: 'hoy', loadComponent: () => import('./features/hoy/hoy.page').then((m) => m.HoyPage) },
+      {
+        path: 'hoy',
+        loadComponent: () => import('./features/hoy/hoy.page').then((m) => m.HoyPage),
+      },
       {
         path: 'semana',
         loadComponent: () => import('./features/semana/semana.page').then((m) => m.SemanaPage),

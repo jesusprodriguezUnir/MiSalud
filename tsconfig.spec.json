@@ -1,14 +1,10 @@
-/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
-/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
+/* Configuración de TypeScript para los tests. Los tests corren con Vitest
+   (ver vitest.config.ts y vitest.rules.config.ts), no con Karma/Jasmine. */
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
-    "types": [
-      "jasmine"
-    ]
+    "types": ["vitest/globals"]
   },
-  "include": [
-    "src/**/*.ts"
-  ]
+  "include": ["src/**/*.spec.ts", "tests/**/*.ts"]
 }

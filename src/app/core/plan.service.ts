@@ -1,14 +1,9 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Firestore, doc, getDoc, setDoc } from '@angular/fire/firestore';
 import { AuthService } from './auth.service';
+import { AvisoService } from './aviso.service';
 import { PERFIL_DEFECTO } from '../../environments/environment';
-import {
-  DIETA,
-  ENTRENO,
-  HABITOS,
-  OBJETIVOS,
-  PLAN_VERSION,
-} from '../domain/plan.seed';
+import { DIETA, ENTRENO, HABITOS, OBJETIVOS, PLAN_VERSION } from '../domain/plan.seed';
 import type { Perfil, Plan } from '../domain/plan.types';
 
 // Carga y siembra del plan y el perfil. Replica el arranque de la app vanilla:
@@ -19,6 +14,12 @@ import type { Perfil, Plan } from '../domain/plan.types';
 export class PlanService {
   private readonly db = inject(Firestore);
   private readonly auth = inject(AuthService);
+  private readonly avisos = inject(AvisoService);
+
+  /** True hasta que perfil y plan se han resuelto contra Firestore. Mientras
+   * tanto los signals de abajo contienen la semilla local, que no debe pintarse
+   * como si fuera el dato remoto. */
+  readonly cargando = signal(true);
 
   readonly plan = signal<Plan>({
     version: PLAN_VERSION,
@@ -29,17 +30,28 @@ export class PlanService {
   });
   readonly perfil = signal<Perfil>({ ...PERFIL_DEFECTO });
 
+  private uid(): string {
+    const uid = this.auth.uid;
+    if (!uid) throw new Error('No hay sesión iniciada');
+    return uid;
+  }
+
   private refPerfil() {
-    return doc(this.db, 'usuarios', this.auth.uid!, 'perfil', 'datos');
+    return doc(this.db, 'usuarios', this.uid(), 'perfil', 'datos');
   }
   private refPlan() {
-    return doc(this.db, 'usuarios', this.auth.uid!, 'plan', 'actual');
+    return doc(this.db, 'usuarios', this.uid(), 'plan', 'actual');
   }
 
   /** Carga perfil y plan, sembrando lo que falte. Se llama tras el login. */
   async cargar(): Promise<void> {
-    await this.cargarPerfil();
-    await this.cargarPlan();
+    this.cargando.set(true);
+    try {
+      await this.cargarPerfil();
+      await this.cargarPlan();
+    } finally {
+      this.cargando.set(false);
+    }
   }
 
   private async cargarPerfil(): Promise<void> {
@@ -52,6 +64,7 @@ export class PlanService {
       }
     } catch (e) {
       console.warn('perfil', e);
+      this.avisos.mostrar('No se ha podido cargar tu perfil.');
     }
   }
 
@@ -81,6 +94,7 @@ export class PlanService {
       }
     } catch (e) {
       console.warn('plan', e);
+      this.avisos.mostrar('No se ha podido cargar el plan.');
     }
   }
 }

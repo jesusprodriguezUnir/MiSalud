@@ -1,5 +1,13 @@
-import { Component, ChangeDetectionStrategy, inject, signal, computed } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  inject,
+  signal,
+  computed,
+  linkedSignal,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { AvisoService } from '../../core/aviso.service';
 import { PesoService } from '../../core/peso.service';
 import { PlanService } from '../../core/plan.service';
 import { NavegacionService } from '../../core/navegacion.service';
@@ -22,6 +30,7 @@ export class PesoPage {
   private readonly pesoSvc = inject(PesoService);
   private readonly planSvc = inject(PlanService);
   private readonly nav = inject(NavegacionService);
+  private readonly avisos = inject(AvisoService);
 
   readonly num = num;
   readonly pesos = this.pesoSvc.pesos;
@@ -34,8 +43,9 @@ export class PesoPage {
   readonly falta = this.pesoSvc.falta;
   readonly ritmo = this.pesoSvc.ritmo;
 
-  // Formulario de alta.
-  fecha = this.nav.fechaIso();
+  // Formulario de alta. La fecha sigue al día seleccionado en la cabecera
+  // (‹ ›) pero admite edición manual hasta el siguiente cambio de día.
+  readonly fecha = linkedSignal(() => this.nav.fechaIso());
   pesoInput = '';
   readonly error = signal('');
 
@@ -57,15 +67,16 @@ export class PesoPage {
   }
 
   async guardar(): Promise<void> {
+    const fecha = this.fecha();
     const v = parseFloat(String(this.pesoInput).replace(',', '.'));
-    if (!this.fecha || !Number.isFinite(v) || v < 30 || v > 200) {
+    if (!fecha || !Number.isFinite(v) || v < 30 || v > 200) {
       this.error.set('Introduce una fecha y un peso válidos.');
       return;
     }
     this.error.set('');
     this.pesoInput = '';
     try {
-      await this.pesoSvc.add(this.fecha, v);
+      await this.pesoSvc.add(fecha, v);
     } catch (e) {
       this.error.set('No se ha podido guardar.');
       console.warn(e);
@@ -78,6 +89,7 @@ export class PesoPage {
       await this.pesoSvc.borrar(fecha);
     } catch (e) {
       console.warn(e);
+      this.avisos.mostrar('No se ha podido borrar el registro.');
     }
   }
 }

@@ -1,6 +1,11 @@
 @let est = estado();
 @let ent = entreno();
 
+<div class="export-bar">
+  <button class="btn ghost mini" (click)="exportarPdf()">📄 Exportar PDF</button>
+  <button class="btn ghost mini" (click)="descargarIcs()">📅 Añadir al calendario</button>
+</div>
+
 <div class="card">
   <div class="card-h">
     <h3>{{ ent.titulo }}</h3>
@@ -76,7 +81,10 @@
   <div class="card-b">
     @for (x of habitos(); track x.t) {
       <div class="item">
-        <div class="n"><b>{{ x.t }}</b><span class="nota">{{ x.d }}</span></div>
+        <div class="n">
+          <b>{{ x.t }}</b
+          ><span class="nota">{{ x.d }}</span>
+        </div>
       </div>
     }
   </div>

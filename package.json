@@ -14,17 +14,8 @@
     "seed": "node scripts/seed.mjs",
     "lint": "ng lint",
     "format": "prettier --write \"src/**/*.{ts,html,scss}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,html,scss}\"",
     "deploy": "ng build && firebase deploy --only firestore:rules,hosting"
-  },
-  "prettier": {
-    "overrides": [
-      {
-        "files": "*.html",
-        "options": {
-          "parser": "angular"
-        }
-      }
-    ]
   },
   "private": true,
   "dependencies": {

@@ -1,4 +1,4 @@
-import { Injectable, inject, signal, computed } from '@angular/core';
+import { Injectable, inject, signal, computed, DestroyRef } from '@angular/core';
 import {
   Firestore,
   collection,
@@ -11,6 +11,7 @@ import {
   Unsubscribe,
 } from '@angular/fire/firestore';
 import { AuthService } from './auth.service';
+import { AvisoService } from './aviso.service';
 import { PlanService } from './plan.service';
 import { mediaMovil, ritmoSemanal } from '../domain/peso.calc';
 import type { Peso } from '../domain/plan.types';
@@ -23,9 +24,16 @@ export class PesoService {
   private readonly db = inject(Firestore);
   private readonly auth = inject(AuthService);
   private readonly planSvc = inject(PlanService);
+  private readonly avisos = inject(AvisoService);
 
   readonly pesos = signal<Peso[]>([]);
   private unsub: Unsubscribe | null = null;
+
+  constructor() {
+    // Cierra el stream si el inyector raíz se destruye (teardown de la app y
+    // de los tests); en el logout lo cierra el shell llamando a detener().
+    inject(DestroyRef).onDestroy(() => this.detener());
+  }
 
   readonly mediaMovil = computed(() => mediaMovil(this.pesos()));
   readonly ultimo = computed(() => {
@@ -47,7 +55,9 @@ export class PesoService {
   readonly ritmo = computed(() => ritmoSemanal(this.mediaMovil()));
 
   private col() {
-    return collection(this.db, 'usuarios', this.auth.uid!, 'pesos');
+    const uid = this.auth.uid;
+    if (!uid) throw new Error('No hay sesión iniciada');
+    return collection(this.db, 'usuarios', uid, 'pesos');
   }
 
   /** Empieza a escuchar la colección de pesos. Se llama tras el login. */
@@ -60,7 +70,10 @@ export class PesoService {
           qs.docs.map((d) => d.data() as Peso).filter((p) => typeof p.peso === 'number'),
         );
       },
-      (e) => console.warn('pesos', e),
+      (e) => {
+        console.warn('pesos', e);
+        this.avisos.mostrar('Se ha perdido la sincronización de los pesos.');
+      },
     );
   }
 

@@ -2,6 +2,7 @@ import { Component, ChangeDetectionStrategy, inject, computed } from '@angular/c
 import { PlanService } from '../../core/plan.service';
 import { DiaService } from '../../core/dia.service';
 import { NavegacionService } from '../../core/navegacion.service';
+import { ExportService } from '../../core/export.service';
 import { idxDia } from '../../domain/fecha.util';
 import { tieneReceta } from '../../domain/plan.types';
 import type { IngestaKey } from '../../domain/plan.types';
@@ -26,6 +27,7 @@ export class HoyPage {
   private readonly planSvc = inject(PlanService);
   private readonly diaSvc = inject(DiaService);
   private readonly nav = inject(NavegacionService);
+  private readonly exportSvc = inject(ExportService);
 
   readonly tieneReceta = tieneReceta;
   readonly nombreIngesta = NOMBRE_INGESTA;
@@ -50,5 +52,13 @@ export class HoyPage {
   }
   toggleIngesta(key: IngestaKey): void {
     void this.diaSvc.toggleIngesta(this.nav.fechaIso(), key);
+  }
+
+  exportarPdf(): void {
+    this.exportSvc.exportarPdf();
+  }
+
+  descargarIcs(): void {
+    this.exportSvc.descargarIcsDia(this.nav.fechaIso(), this.dia(), this.entreno());
   }
 }

@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, inject, signal, computed } from '@angular/core';
 import { PlanService } from '../../core/plan.service';
+import { ExportService } from '../../core/export.service';
 import { agregarCompra } from '../../domain/compra.calc';
 import { num } from '../../domain/fecha.util';
 
@@ -12,6 +13,7 @@ const DIAS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 })
 export class CompraPage {
   private readonly planSvc = inject(PlanService);
+  private readonly exportSvc = inject(ExportService);
 
   readonly num = num;
   readonly dias = DIAS;
@@ -35,5 +37,9 @@ export class CompraPage {
 
   toggleTodos(): void {
     this.seleccion.set(new Set(this.todos() ? [] : [0, 1, 2, 3, 4, 5, 6]));
+  }
+
+  exportarPdf(): void {
+    this.exportSvc.exportarPdf();
   }
 }

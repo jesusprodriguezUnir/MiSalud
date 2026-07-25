@@ -25,6 +25,9 @@ jobs:
 
       - run: npm ci
 
+      - name: Formato
+        run: npm run format:check
+
       - name: Lint
         run: npm run lint
 
@@ -57,6 +60,6 @@ jobs:
         run: |
           echo "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
           export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
-          npx firebase deploy --only firestore:rules,hosting --project TU_PROYECTO --non-interactive
+          npx firebase deploy --only firestore:rules,hosting --non-interactive
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}

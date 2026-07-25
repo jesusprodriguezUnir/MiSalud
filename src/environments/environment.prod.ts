@@ -1,26 +1,11 @@
-// Configuración de producción. Comparte las mismas claves de Firebase (que son
-// públicas) que desarrollo, con producción activada y sin emuladores. No importa
-// de environment.ts porque en la build de producción ese fichero se sustituye
-// por este (evita una definición circular).
-import type { Perfil } from '../app/domain/plan.types';
+// Configuración de producción: sustituye a environment.ts en la build de
+// producción (ver fileReplacements en angular.json).
+import { FIREBASE_CONFIG } from './firebase.config';
 
 export const environment = {
   production: true,
-  firebase: {
-    apiKey: 'AIzaSyAMJpcsEdghzQb70ZkBpWFFw2gqNyOElig',
-    authDomain: 'misalud-133ef.firebaseapp.com',
-    projectId: 'misalud-133ef',
-    storageBucket: 'misalud-133ef.firebasestorage.app',
-    messagingSenderId: '322417702439',
-    appId: '1:322417702439:web:8d78ee905770f844fb0002',
-  },
+  firebase: FIREBASE_CONFIG,
   useEmulators: false,
 };
 
-export const PERFIL_DEFECTO: Perfil = {
-  nombre: 'Jesús',
-  alturaCm: 171,
-  pesoInicial: 90,
-  fechaInicio: '2026-08-01',
-  objetivo: 80,
-};
+export { PERFIL_DEFECTO } from './firebase.config';

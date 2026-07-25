@@ -53,9 +53,21 @@ import type { Peso } from '../../domain/plan.types';
             stroke-dasharray="5 4"
           />
         }
-        <path [attr.d]="lineaDiaria()" fill="none" stroke="var(--accent)" stroke-width="1.2" opacity="0.4" />
+        <path
+          [attr.d]="lineaDiaria()"
+          fill="none"
+          stroke="var(--accent)"
+          stroke-width="1.2"
+          opacity="0.4"
+        />
         @for (p of pesos(); track p.fecha) {
-          <circle [attr.cx]="e.x(p.fecha)" [attr.cy]="e.y(p.peso)" r="2.6" fill="var(--accent)" opacity="0.45" />
+          <circle
+            [attr.cx]="e.x(p.fecha)"
+            [attr.cy]="e.y(p.peso)"
+            r="2.6"
+            fill="var(--accent)"
+            opacity="0.45"
+          />
         }
         <path
           [attr.d]="lineaMedia()"

@@ -20,11 +20,21 @@
         <span>{{ nav.fecha() | fechaLarga }}{{ nav.esHoy() ? ' · hoy' : '' }}</span>
       </div>
       <button class="nav" (click)="nav.mover(1)" aria-label="Día siguiente">›</button>
-      <button class="theme-toggle" (click)="theme.toggle()" [attr.aria-label]="temaLabel()" [title]="temaLabel()">
+      <button
+        class="theme-toggle"
+        (click)="theme.toggle()"
+        [attr.aria-label]="temaLabel()"
+        [title]="temaLabel()"
+      >
         @if (theme.tema() === 'claro') {
           <svg viewBox="0 0 24 24"><path d="M21 12.6A9 9 0 1 1 11.4 3a7 7 0 0 0 9.6 9.6Z" /></svg>
         } @else {
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5" /><path d="M12 2v3M12 19v3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M2 12h3M19 12h3M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1" /></svg>
+          <svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="4.5" />
+            <path
+              d="M12 2v3M12 19v3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M2 12h3M19 12h3M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"
+            />
+          </svg>
         }
       </button>
       <button class="logout" (click)="logout()">Salir</button>
@@ -33,8 +43,26 @@
 </header>
 
 <main class="wrap">
-  <router-outlet />
+  @if (listo()) {
+    <router-outlet />
+  } @else {
+    <div class="esqueleto" aria-hidden="true">
+      <div class="card">
+        <div class="linea t"></div>
+        <div class="linea"></div>
+        <div class="linea corta"></div>
+      </div>
+      <div class="card">
+        <div class="linea t"></div>
+        <div class="linea"></div>
+        <div class="linea corta"></div>
+      </div>
+    </div>
+    <p class="cargando-sr">Cargando tu plan…</p>
+  }
 </main>
+
+<app-aviso-toast />
 
 <nav class="tabs">
   <a routerLink="/hoy" routerLinkActive="on">

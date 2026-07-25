@@ -161,7 +161,11 @@ export const DIETA: DiaDieta[] = [
           AGUA_CENA,
           { n: 'Yogur bio cremoso', c: '125 g (1 unidad)' },
           { n: 'Fresa o fresón', c: '60 g (3 unidades)' },
-          { n: 'Almendra sin cáscara', c: '30 g (20 almendras)', nota: 'El plan lo lista como dos raciones de 15 g' },
+          {
+            n: 'Almendra sin cáscara',
+            c: '30 g (20 almendras)',
+            nota: 'El plan lo lista como dos raciones de 15 g',
+          },
         ],
       },
     },
@@ -506,7 +510,14 @@ export const ENTRENO: DiaEntreno[] = [
     duracion: '35 min',
     tipo: 'fuerza',
     bloques: [
-      { t: 'Calentamiento (5 min)', e: ['Gato-camello 8 repeticiones', 'Círculos de cadera 10 por lado', 'Banda elástica: aperturas de hombro 15 repeticiones'] },
+      {
+        t: 'Calentamiento (5 min)',
+        e: [
+          'Gato-camello 8 repeticiones',
+          'Círculos de cadera 10 por lado',
+          'Banda elástica: aperturas de hombro 15 repeticiones',
+        ],
+      },
       {
         t: 'Principal (25 min)',
         e: [
@@ -518,7 +529,10 @@ export const ENTRENO: DiaEntreno[] = [
           'Elevación de talones · 2 × 15',
         ],
       },
-      { t: 'Vuelta a la calma (5 min)', e: ['Estiramiento de isquiotibiales, psoas y dorsal, 30 s cada uno'] },
+      {
+        t: 'Vuelta a la calma (5 min)',
+        e: ['Estiramiento de isquiotibiales, psoas y dorsal, 30 s cada uno'],
+      },
     ],
     claves: [
       'Exhalar siempre al empujar o tirar. Si notas que aguantas el aire, baja el peso.',
@@ -531,7 +545,12 @@ export const ENTRENO: DiaEntreno[] = [
     titulo: 'Pilates',
     duracion: '50 min',
     tipo: 'movilidad',
-    bloques: [{ t: 'Sesión dirigida', e: ['Avisa al instructor de la tendinitis y de la hernia de hiato.'] }],
+    bloques: [
+      {
+        t: 'Sesión dirigida',
+        e: ['Avisa al instructor de la tendinitis y de la hernia de hiato.'],
+      },
+    ],
     claves: [
       'Evita ejercicios con carga sobre la muñeca/hombro doloridos: sustituye plancha alta por plancha en antebrazos.',
       'Evita inversiones y roll-over: empeoran el reflujo.',
@@ -544,7 +563,14 @@ export const ENTRENO: DiaEntreno[] = [
     duracion: '35 min',
     tipo: 'fuerza',
     bloques: [
-      { t: 'Calentamiento (5 min)', e: ['Movilidad de hombro con banda 10 repeticiones', 'Sentadilla sin carga 10 repeticiones', 'Rotaciones de columna dorsal 8 por lado'] },
+      {
+        t: 'Calentamiento (5 min)',
+        e: [
+          'Movilidad de hombro con banda 10 repeticiones',
+          'Sentadilla sin carga 10 repeticiones',
+          'Rotaciones de columna dorsal 8 por lado',
+        ],
+      },
       {
         t: 'Principal (25 min)',
         e: [
@@ -556,7 +582,10 @@ export const ENTRENO: DiaEntreno[] = [
           'Pallof press con banda · 2 × 10 por lado',
         ],
       },
-      { t: 'Vuelta a la calma (5 min)', e: ['Estiramiento de pectoral en marco de puerta y de cuádriceps, 30 s cada uno'] },
+      {
+        t: 'Vuelta a la calma (5 min)',
+        e: ['Estiramiento de pectoral en marco de puerta y de cuádriceps, 30 s cada uno'],
+      },
     ],
     claves: [
       'Nada de press militar ni movimientos por encima de la cabeza hasta que desaparezcan los mareos.',
@@ -580,7 +609,10 @@ export const ENTRENO: DiaEntreno[] = [
         ],
       },
     ],
-    claves: ['Alterna estilos para no cargar el hombro con tendinitis.', 'Deja pasar al menos 2 h desde la comida.'],
+    claves: [
+      'Alterna estilos para no cargar el hombro con tendinitis.',
+      'Deja pasar al menos 2 h desde la comida.',
+    ],
   },
   {
     dia: 'Viernes',
@@ -588,11 +620,22 @@ export const ENTRENO: DiaEntreno[] = [
     duracion: '50 min',
     tipo: 'cardio',
     bloques: [
-      { t: 'Caminata (40 min)', e: ['Ritmo vivo, capaz de hablar pero no de cantar. Busca alguna cuesta.'] },
-      { t: 'Impacto óseo (opcional)', e: ['2 × 1 min de trote muy suave, solo si no hay molestias.'] },
-      { t: 'Movilidad (10 min)', e: ['Apertura de cadera, movilidad dorsal y estiramiento de gemelo.'] },
+      {
+        t: 'Caminata (40 min)',
+        e: ['Ritmo vivo, capaz de hablar pero no de cantar. Busca alguna cuesta.'],
+      },
+      {
+        t: 'Impacto óseo (opcional)',
+        e: ['2 × 1 min de trote muy suave, solo si no hay molestias.'],
+      },
+      {
+        t: 'Movilidad (10 min)',
+        e: ['Apertura de cadera, movilidad dorsal y estiramiento de gemelo.'],
+      },
     ],
-    claves: ['El impacto ligero es uno de los pocos estímulos que frenan la osteopenia; introdúcelo poco a poco.'],
+    claves: [
+      'El impacto ligero es uno de los pocos estímulos que frenan la osteopenia; introdúcelo poco a poco.',
+    ],
   },
   {
     dia: 'Sábado',
@@ -600,10 +643,19 @@ export const ENTRENO: DiaEntreno[] = [
     duracion: '60 min',
     tipo: 'cardio',
     bloques: [
-      { t: 'Antes de salir (10 min)', e: ['Movilidad de cadera y columna dorsal, activación de glúteo.'] },
-      { t: 'Actividad', e: ['Paseo al aire libre, senderismo o caminata continua a ritmo cómodo.'] },
+      {
+        t: 'Antes de salir (10 min)',
+        e: ['Movilidad de cadera y columna dorsal, activación de glúteo.'],
+      },
+      {
+        t: 'Actividad',
+        e: ['Paseo al aire libre, senderismo o caminata continua a ritmo cómodo.'],
+      },
     ],
-    claves: ['Hidrátate bien durante la actividad.', 'Lleva el tentempié previsto para no llegar a la comida con hambre acumulada.'],
+    claves: [
+      'Hidrátate bien durante la actividad.',
+      'Lleva el tentempié previsto para no llegar a la comida con hambre acumulada.',
+    ],
   },
   {
     dia: 'Domingo',
@@ -612,24 +664,48 @@ export const ENTRENO: DiaEntreno[] = [
     tipo: 'movilidad',
     bloques: [
       { t: 'Caminata (50 min)', e: ['Ritmo cómodo, en compañía si es posible.'] },
-      { t: 'Estiramientos (10 min)', e: ['Cadena posterior completa, 30 s por posición, sin rebotes.'] },
+      {
+        t: 'Estiramientos (10 min)',
+        e: ['Cadena posterior completa, 30 s por posición, sin rebotes.'],
+      },
     ],
     claves: ['Día de recuperación activa: la idea es moverse, no rendir.'],
   },
 ];
 
 export const HABITOS: Habito[] = [
-  { t: 'Aceite de oliva virgen extra', d: 'Más de 3 cucharadas soperas al día repartidas entre las ingestas.' },
-  { t: 'Agua', d: 'Alrededor de 2 L al día, sobre todo fuera de las comidas. El objetivo del informe era subir desde 1 L.' },
-  { t: 'Agua con gas bicarbonatada', d: 'Tipo Vichy Catalán, para el reflujo. Evita bebidas azucaradas o con sodio (Aquarius).' },
-  { t: 'Cena temprano', d: 'Cenar a las 20:00 y no tumbarse hasta 2-3 h después: es la medida que más ayuda con la hernia de hiato.' },
+  {
+    t: 'Aceite de oliva virgen extra',
+    d: 'Más de 3 cucharadas soperas al día repartidas entre las ingestas.',
+  },
+  {
+    t: 'Agua',
+    d: 'Alrededor de 2 L al día, sobre todo fuera de las comidas. El objetivo del informe era subir desde 1 L.',
+  },
+  {
+    t: 'Agua con gas bicarbonatada',
+    d: 'Tipo Vichy Catalán, para el reflujo. Evita bebidas azucaradas o con sodio (Aquarius).',
+  },
+  {
+    t: 'Cena temprano',
+    d: 'Cenar a las 20:00 y no tumbarse hasta 2-3 h después: es la medida que más ayuda con la hernia de hiato.',
+  },
   { t: 'Romper el sedentarismo', d: 'Levantarse 3 minutos cada hora de trabajo de oficina.' },
-  { t: 'Comidas de menor volumen', d: '5 ingestas al día. Comer despacio y masticar bien reduce la distensión abdominal.' },
-  { t: 'Entrenar en postabsortivo', d: '2-3 h después de comer, nunca justo después de una ingesta.' },
+  {
+    t: 'Comidas de menor volumen',
+    d: '5 ingestas al día. Comer despacio y masticar bien reduce la distensión abdominal.',
+  },
+  {
+    t: 'Entrenar en postabsortivo',
+    d: '2-3 h después de comer, nunca justo después de una ingesta.',
+  },
 ];
 
 export const OBJETIVOS: Objetivo[] = [
-  { t: 'Peso', d: 'Bajar desde 66,5 kg (03/06/2026). Una pérdida del 8-10 % en 6 meses sitúa el objetivo en torno a 60 kg.' },
+  {
+    t: 'Peso',
+    d: 'Bajar desde 66,5 kg (03/06/2026). Una pérdida del 8-10 % en 6 meses sitúa el objetivo en torno a 60 kg.',
+  },
   { t: 'Grasa corporal', d: 'Por debajo del 28 % (partida: 37,4 %).' },
   { t: 'Grasa visceral', d: 'Por debajo de 100 cm² (partida: 114,3 cm²).' },
   { t: 'Metabolismo basal', d: 'Subirlo desde 1270 kcal con trabajo de fuerza.' },

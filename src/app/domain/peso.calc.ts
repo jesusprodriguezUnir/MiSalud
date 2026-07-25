@@ -18,7 +18,9 @@ export interface PuntoMedia {
 export function mediaMovil(pesos: Peso[], ventana = 7): PuntoMedia[] {
   return pesos.map((p, i) => {
     const t = new Date(p.fecha).getTime();
-    const win = pesos.filter((q, j) => j <= i && t - new Date(q.fecha).getTime() < ventana * DIA_MS);
+    const win = pesos.filter(
+      (q, j) => j <= i && t - new Date(q.fecha).getTime() < ventana * DIA_MS,
+    );
     return { fecha: p.fecha, peso: win.reduce((a, b) => a + b.peso, 0) / win.length };
   });
 }
@@ -32,7 +34,8 @@ export function ritmoSemanal(mm: PuntoMedia[]): number | null {
   if (mm.length <= 3) return null;
   const fin = mm[mm.length - 1];
   const ref =
-    [...mm].reverse().find((p) => +new Date(fin.fecha) - +new Date(p.fecha) >= 21 * DIA_MS) ?? mm[0];
+    [...mm].reverse().find((p) => +new Date(fin.fecha) - +new Date(p.fecha) >= 21 * DIA_MS) ??
+    mm[0];
   const dias = (+new Date(fin.fecha) - +new Date(ref.fecha)) / DIA_MS;
   if (dias < 7) return null;
   return ((fin.peso - ref.peso) / dias) * 7;

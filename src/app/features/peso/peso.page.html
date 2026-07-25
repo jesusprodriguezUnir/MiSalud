@@ -1,13 +1,18 @@
 @let u = ultimo();
 
 <div class="kpis">
-  <div class="kpi"><span>Actual</span><strong>{{ u ? num(u.peso) + ' kg' : '—' }}</strong></div>
+  <div class="kpi">
+    <span>Actual</span><strong>{{ u ? num(u.peso) + ' kg' : '—' }}</strong>
+  </div>
   <div class="kpi">
     <span>Media 7 d</span><strong>{{ media7() !== null ? num(media7()!) + ' kg' : '—' }}</strong>
   </div>
   <div class="kpi">
     <span>Desde el inicio</span>
-    <strong [class.down]="delta() !== null && delta()! < 0" [class.up]="delta() !== null && delta()! > 0">
+    <strong
+      [class.down]="delta() !== null && delta()! < 0"
+      [class.up]="delta() !== null && delta()! > 0"
+    >
       {{ delta() === null ? '—' : (delta()! > 0 ? '+' : '') + num(delta()!) + ' kg' }}
     </strong>
   </div>
@@ -16,7 +21,10 @@
   </div>
   <div class="kpi">
     <span>Ritmo semanal</span>
-    <strong [class.down]="ritmo() !== null && ritmo()! < 0" [class.up]="ritmo() !== null && ritmo()! > 0">
+    <strong
+      [class.down]="ritmo() !== null && ritmo()! < 0"
+      [class.up]="ritmo() !== null && ritmo()! > 0"
+    >
       {{ ritmo() === null ? '—' : (ritmo()! > 0 ? '+' : '') + num(ritmo()!) + ' kg' }}
     </strong>
   </div>
@@ -25,7 +33,13 @@
 <div class="card">
   <div class="card-h"><h3>Registrar peso</h3></div>
   <div class="card-b">
-    <input type="date" [(ngModel)]="fecha" name="fecha" />
+    <input
+      type="date"
+      [ngModel]="fecha()"
+      (ngModelChange)="fecha.set($event)"
+      name="fecha"
+      aria-label="Fecha del registro"
+    />
     <div class="form-row">
       <input
         class="input-lg"
@@ -48,14 +62,20 @@
   <div class="card-h"><h3>Evolución</h3></div>
   <app-peso-chart [pesos]="pesos()" [objetivo]="perfil().objetivo" />
   <div class="leyenda">
-    <span><i style="border-color:var(--accent)"></i>Media de 7 días</span>
-    <span><i style="border-color:var(--accent);opacity:.4"></i>Peso diario</span>
-    <span><i style="border-color:var(--warn);border-top-style:dashed"></i>Objetivo {{ num(perfil().objetivo) }} kg</span>
+    <span><i style="border-color: var(--accent)"></i>Media de 7 días</span>
+    <span><i style="border-color: var(--accent); opacity: 0.4"></i>Peso diario</span>
+    <span
+      ><i style="border-color: var(--warn); border-top-style: dashed"></i>Objetivo
+      {{ num(perfil().objetivo) }} kg</span
+    >
   </div>
 </div>
 
 <div class="card">
-  <div class="card-h"><h3>Registros</h3><span class="tag gris">{{ pesos().length }}</span></div>
+  <div class="card-h">
+    <h3>Registros</h3>
+    <span class="tag gris">{{ pesos().length }}</span>
+  </div>
   <div class="card-b">
     @if (filas().length) {
       <table class="pesos">
@@ -64,7 +84,7 @@
             <td>
               {{ fmtDia(f.fecha) }}
               @if (f.delta !== null) {
-                <span class="c" style="color:var(--muted);font-size:12px">
+                <span class="c" style="color: var(--muted); font-size: 12px">
                   {{ (f.delta > 0 ? '+' : '') + num(f.delta) }}
                 </span>
               }
@@ -85,7 +105,10 @@
   <div class="card-b">
     @for (o of objetivos(); track o.t) {
       <div class="item">
-        <div class="n"><b>{{ o.t }}</b><span class="nota">{{ o.d }}</span></div>
+        <div class="n">
+          <b>{{ o.t }}</b
+          ><span class="nota">{{ o.d }}</span>
+        </div>
       </div>
     }
   </div>

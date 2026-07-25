@@ -1,3 +1,8 @@
+<div class="export-bar">
+  <button class="btn ghost mini" (click)="exportarPdf()">📄 Exportar Plan PDF</button>
+  <button class="btn ghost mini" (click)="descargarIcsPlan()">📅 Añadir Plan al calendario</button>
+</div>
+
 <div class="semana">
   @for (d of dieta(); track d.dia; let i = $index) {
     <button class="dcard" [class.hoy]="i === hoyI" (click)="ir(i)">

@@ -36,4 +36,3 @@ export class ThemeService {
     return matchMedia('(prefers-color-scheme: dark)').matches ? 'oscuro' : 'claro';
   }
 }
-

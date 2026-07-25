@@ -145,6 +145,44 @@ main {
   padding: 6px;
 }
 
+// Esqueleto de carga: ocupa el hueco del contenido mientras el plan remoto no
+// ha respondido, para no pintar la semilla local como si fuera el dato bueno.
+.esqueleto .card {
+  padding: 14px 12px;
+}
+.esqueleto .linea {
+  height: 12px;
+  margin: 10px 0;
+  background: var(--color-neutral-300);
+  animation: latido 1.2s ease-in-out infinite;
+}
+.esqueleto .linea.t {
+  height: 18px;
+  width: 45%;
+}
+.esqueleto .linea.corta {
+  width: 65%;
+}
+@keyframes latido {
+  50% {
+    opacity: 0.45;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .esqueleto .linea {
+    animation: none;
+  }
+}
+
+.cargando-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 @media (min-width: 960px) {
   .brand {
     display: block;

@@ -12,6 +12,7 @@ export interface ItemReceta {
   n: string;
   receta: Receta;
   c?: never;
+  nota?: string;
 }
 
 /** Un ítem de comida simple: nombre y cantidad. */

@@ -8,12 +8,18 @@ const ORDEN: IngestaKey[] = ['desayuno', 'tentempie', 'comida', 'merienda', 'cen
 
 const CATS: [RegExp, string][] = [
   [/naranja|plátano|melón|ciruela|cereza|fresa|frambuesa|arándano|aguacate/i, 'Fruta'],
-  [/judía|tomate|pimiento|cebolla|patata|coliflor|calabacín|espinaca|rúcula|pepino|alcachofa|champiñón|seta|guisante|ajo|laurel|perejil|aceituna/i, 'Verdura y hortaliza'],
+  [
+    /judía|tomate|pimiento|cebolla|patata|coliflor|calabacín|espinaca|rúcula|pepino|alcachofa|champiñón|seta|guisante|ajo|laurel|perejil|aceituna/i,
+    'Verdura y hortaliza',
+  ],
   [/sardina|atún|rodaballo|sepia|berberecho|salmón|bacalao/i, 'Pescado y conservas'],
   [/pavo|jamón|pollo/i, 'Carne y fiambre'],
   [/huevo|clara|yogur|kéfir|queso/i, 'Huevos y lácteos'],
   [/almendra|avellana|sésamo/i, 'Frutos secos y semillas'],
-  [/pan|macarrón|macarrones|garbanzo|aceite|vinagre|guacamole|vino|café|vichy|pimienta/i, 'Despensa'],
+  [
+    /pan|macarrón|macarrones|garbanzo|aceite|vinagre|guacamole|vino|café|vichy|pimienta/i,
+    'Despensa',
+  ],
 ];
 
 const IGNORA = /^(agua|sal común)$/i;

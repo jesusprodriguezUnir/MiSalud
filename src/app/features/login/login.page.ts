@@ -39,8 +39,7 @@ import { AuthService } from '../../core/auth.service';
         </button>
         <div class="err">{{ error() }}</div>
         <p class="nota">
-          Los datos se guardan cifrados en tu cuenta. Funciona sin cobertura y sincroniza al
-          volver.
+          Los datos se guardan cifrados en tu cuenta. Funciona sin cobertura y sincroniza al volver.
         </p>
       </form>
     </div>
