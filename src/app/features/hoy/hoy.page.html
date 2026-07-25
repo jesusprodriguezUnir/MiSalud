@@ -1,5 +1,6 @@
 @let est = estado();
 @let ent = entreno();
+@let f = foto();
 
 <div class="hoy-grid">
   <!-- Cabecera del día: titular (solo escritorio) y progreso. -->
@@ -9,7 +10,7 @@
       <h1>{{ diaSemana() }}</h1>
     </div>
 
-    <div class="progreso">
+    <div class="progreso" [class.completo]="hechasTotal() === total()">
       <div class="progreso-num">
         <span class="kicker">Progreso del día</span>
         <strong>{{ pct() }}</strong
@@ -28,22 +29,32 @@
     </div>
   </div>
 
-  <div class="hoy-foto">
-    <app-foto-placeholder variante="hero" texto="Foto del plato principal de hoy" />
+  <!-- La foto solo ocupa sitio en móvil cuando el plan trae una de verdad: un
+       marcador punteado permanente sería ruido en una pantalla estrecha. -->
+  <div class="hoy-foto" [class.con-foto]="!!f">
+    <app-foto-placeholder
+      variante="hero"
+      [fotoUrl]="f?.url"
+      [texto]="f ? f.titulo : 'Foto del plato principal de hoy'"
+    />
+    @if (f) {
+      <figcaption class="hoy-foto-pie">{{ f.titulo }}</figcaption>
+    }
   </div>
 
   <div class="hoy-ingestas">
     @for (row of ingestas(); track row.key) {
-      <section class="ingesta">
+      <section class="ingesta" [class.hecha]="est.hechas[row.key]">
         <div class="ingesta-h">
           <span class="hora">{{ row.ingesta.hora }}</span>
           <h3>{{ nombreIngesta[row.key] }}</h3>
           <button
             class="chk"
+            role="checkbox"
             [class.on]="est.hechas[row.key]"
             (click)="toggleIngesta(row.key)"
-            [attr.aria-pressed]="!!est.hechas[row.key]"
-            [attr.aria-label]="'Marcar ' + nombreIngesta[row.key] + ' como hecho'"
+            [attr.aria-checked]="!!est.hechas[row.key]"
+            [attr.aria-label]="nombreIngesta[row.key] + ' hecho'"
           >
             <svg viewBox="0 0 24 24"><path d="M4 12l6 6L20 6" /></svg>
           </button>
@@ -76,10 +87,11 @@
         </div>
         <button
           class="chk"
+          role="checkbox"
           [class.on]="est.entreno"
           (click)="toggleEntreno()"
-          [attr.aria-pressed]="est.entreno"
-          aria-label="Marcar el entrenamiento como hecho"
+          [attr.aria-checked]="est.entreno"
+          aria-label="Entrenamiento hecho"
         >
           <svg viewBox="0 0 24 24"><path d="M4 12l6 6L20 6" /></svg>
         </button>

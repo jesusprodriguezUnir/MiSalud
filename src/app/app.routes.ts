@@ -28,6 +28,10 @@ export const routes: Routes = [
         path: 'compra',
         loadComponent: () => import('./features/compra/compra.page').then((m) => m.CompraPage),
       },
+      {
+        path: 'ajustes',
+        loadComponent: () => import('./features/ajustes/ajustes.page').then((m) => m.AjustesPage),
+      },
       { path: '', redirectTo: 'hoy', pathMatch: 'full' },
     ],
   },

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { mediaMovil, ritmoSemanal, escalaChart } from './peso.calc';
+import { mediaMovil, ritmoSemanal, escalaChart, imc } from './peso.calc';
 import type { Peso } from './plan.types';
 
 const p = (fecha: string, peso: number): Peso => ({ fecha, peso });
@@ -65,5 +65,29 @@ describe('escalaChart', () => {
     // el objetivo (60) queda dentro del rango con el padding
     expect(esc!.min).toBeLessThan(60);
     expect(esc!.max).toBeGreaterThan(66);
+  });
+});
+
+describe('imc', () => {
+  it('calcula el índice y lo clasifica', () => {
+    const r = imc(70, 175);
+    expect(r!.valor).toBeCloseTo(22.86, 2);
+    expect(r!.categoria).toBe('Normal');
+  });
+
+  it('marca los límites de las categorías OMS', () => {
+    expect(imc(56.6, 175)!.categoria).toBe('Bajo peso'); // 18,48
+    expect(imc(56.7, 175)!.categoria).toBe('Normal'); // 18,51
+    expect(imc(76.5, 175)!.categoria).toBe('Normal'); // 24,98
+    expect(imc(76.6, 175)!.categoria).toBe('Sobrepeso'); // 25,01
+    expect(imc(91.8, 175)!.categoria).toBe('Sobrepeso'); // 29,98
+    expect(imc(92, 175)!.categoria).toBe('Obesidad'); // 30,04
+  });
+
+  it('devuelve null sin peso o con altura implausible', () => {
+    expect(imc(null, 175)).toBeNull();
+    expect(imc(70, undefined)).toBeNull();
+    expect(imc(70, 40)).toBeNull();
+    expect(imc(70, 300)).toBeNull();
   });
 });

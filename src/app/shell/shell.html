@@ -6,11 +6,11 @@
   <div class="wrap hbar">
     <span class="brand">MiSalud</span>
 
-    <nav class="tabs-desktop">
-      <a routerLink="/hoy" routerLinkActive="on">Hoy</a>
-      <a routerLink="/semana" routerLinkActive="on">Semana</a>
-      <a routerLink="/peso" routerLinkActive="on">Peso</a>
-      <a routerLink="/compra" routerLinkActive="on">Compra</a>
+    <nav class="tabs-desktop" aria-label="Secciones">
+      <a routerLink="/hoy" routerLinkActive="on" ariaCurrentWhenActive="page">Hoy</a>
+      <a routerLink="/semana" routerLinkActive="on" ariaCurrentWhenActive="page">Semana</a>
+      <a routerLink="/peso" routerLinkActive="on" ariaCurrentWhenActive="page">Peso</a>
+      <a routerLink="/compra" routerLinkActive="on" ariaCurrentWhenActive="page">Compra</a>
     </nav>
 
     <div class="hbar-actions">
@@ -37,6 +37,21 @@
           </svg>
         }
       </button>
+      <a
+        class="theme-toggle"
+        routerLink="/ajustes"
+        routerLinkActive="on"
+        ariaCurrentWhenActive="page"
+        aria-label="Ajustes"
+        title="Ajustes"
+      >
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="3" />
+          <path
+            d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 9 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 4.6 9a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1Z"
+          />
+        </svg>
+      </a>
       <button class="logout" (click)="logout()">Salir</button>
     </div>
   </div>
@@ -64,25 +79,25 @@
 
 <app-aviso-toast />
 
-<nav class="tabs">
-  <a routerLink="/hoy" routerLinkActive="on">
+<nav class="tabs" aria-label="Secciones">
+  <a routerLink="/hoy" routerLinkActive="on" ariaCurrentWhenActive="page">
     <svg viewBox="0 0 24 24"><path d="M3 12h4l3 8 4-16 3 8h4" /></svg>Hoy
   </a>
-  <a routerLink="/semana" routerLinkActive="on">
+  <a routerLink="/semana" routerLinkActive="on" ariaCurrentWhenActive="page">
     <svg viewBox="0 0 24 24">
       <rect x="3" y="5" width="18" height="16" rx="2" />
       <path d="M3 10h18M8 3v4M16 3v4" />
     </svg>
     Semana
   </a>
-  <a routerLink="/peso" routerLinkActive="on">
+  <a routerLink="/peso" routerLinkActive="on" ariaCurrentWhenActive="page">
     <svg viewBox="0 0 24 24">
       <path d="M3 17l6-6 4 4 8-8" />
       <path d="M21 3v6h-6" />
     </svg>
     Peso
   </a>
-  <a routerLink="/compra" routerLinkActive="on">
+  <a routerLink="/compra" routerLinkActive="on" ariaCurrentWhenActive="page">
     <svg viewBox="0 0 24 24">
       <path d="M6 6h15l-1.5 9h-12z" />
       <circle cx="9" cy="20" r="1.4" />

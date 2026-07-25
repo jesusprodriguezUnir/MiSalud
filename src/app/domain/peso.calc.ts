@@ -41,6 +41,33 @@ export function ritmoSemanal(mm: PuntoMedia[]): number | null {
   return ((fin.peso - ref.peso) / dias) * 7;
 }
 
+export type CategoriaImc = 'Bajo peso' | 'Normal' | 'Sobrepeso' | 'Obesidad';
+
+export interface Imc {
+  valor: number;
+  categoria: CategoriaImc;
+}
+
+/**
+ * Índice de masa corporal (kg/m²) con su categoría OMS. Devuelve `null` si
+ * falta el peso o la altura no es plausible, para no pintar una cifra inventada
+ * cuando el perfil todavía está a medio rellenar.
+ */
+export function imc(pesoKg: number | null | undefined, alturaCm: number | undefined): Imc | null {
+  if (!pesoKg || !alturaCm || alturaCm < 100 || alturaCm > 250) return null;
+  const m = alturaCm / 100;
+  const valor = pesoKg / (m * m);
+  if (!Number.isFinite(valor)) return null;
+  return { valor, categoria: categoriaImc(valor) };
+}
+
+function categoriaImc(valor: number): CategoriaImc {
+  if (valor < 18.5) return 'Bajo peso';
+  if (valor < 25) return 'Normal';
+  if (valor < 30) return 'Sobrepeso';
+  return 'Obesidad';
+}
+
 export interface EscalaChart {
   W: number;
   H: number;

@@ -12,6 +12,7 @@ import { PesoService } from '../../core/peso.service';
 import { PlanService } from '../../core/plan.service';
 import { NavegacionService } from '../../core/navegacion.service';
 import { num } from '../../domain/fecha.util';
+import { imc } from '../../domain/peso.calc';
 import { PesoChart } from './peso-chart';
 
 interface FilaTabla {
@@ -42,6 +43,9 @@ export class PesoPage {
   readonly delta = this.pesoSvc.delta;
   readonly falta = this.pesoSvc.falta;
   readonly ritmo = this.pesoSvc.ritmo;
+
+  /** IMC del último peso con la altura del perfil (null si falta alguno). */
+  readonly imc = computed(() => imc(this.ultimo()?.peso, this.perfil().alturaCm));
 
   // Formulario de alta. La fecha sigue al día seleccionado en la cabecera
   // (‹ ›) pero admite edición manual hasta el siguiente cambio de día.

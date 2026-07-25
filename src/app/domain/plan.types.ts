@@ -42,9 +42,22 @@ export interface Ingesta {
 /** Claves de las cinco ingestas del día, en orden de consumo. */
 export type IngestaKey = 'desayuno' | 'tentempie' | 'comida' | 'merienda' | 'cena';
 
+/** Las cinco ingestas en orden de consumo. Única fuente: la usan la vista Hoy
+ * y el cálculo de la lista de la compra. */
+export const ORDEN_INGESTAS: readonly IngestaKey[] = [
+  'desayuno',
+  'tentempie',
+  'comida',
+  'merienda',
+  'cena',
+] as const;
+
 export interface DiaDieta {
   dia: string;
   entrenoFuerte?: boolean;
+  /** Foto de cabecera del día. Se edita en Firestore, como el resto del plan;
+   * si falta, la vista Hoy cae en la foto de la primera receta del día. */
+  fotoUrl?: string;
   ingestas: Partial<Record<IngestaKey, Ingesta>>;
 }
 

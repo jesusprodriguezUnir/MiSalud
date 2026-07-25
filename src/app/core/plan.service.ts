@@ -54,6 +54,17 @@ export class PlanService {
     }
   }
 
+  /**
+   * Guarda el perfil editado desde Ajustes. Escribe el documento entero (no un
+   * merge) porque las reglas de Firestore validan que `perfil/datos` tenga
+   * exactamente esas cinco claves. Lanza si falla, para que la pantalla pueda
+   * mostrar el error sin dar por buena una edición que no se guardó.
+   */
+  async actualizarPerfil(datos: Perfil): Promise<void> {
+    await setDoc(this.refPerfil(), datos);
+    this.perfil.set(datos);
+  }
+
   private async cargarPerfil(): Promise<void> {
     try {
       const snap = await getDoc(this.refPerfil());

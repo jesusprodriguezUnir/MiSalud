@@ -394,7 +394,10 @@ details.rec[open] summary::before {
 }
 
 // Casilla de «hecho»: cuadrado hueco que se rellena de acento al marcarse.
+// Es el control que más se pulsa de la app, así que se le da un objetivo táctil
+// holgado (44px reales) sin engordar el cuadrado dibujado, y estados propios.
 .chk {
+  position: relative;
   width: 30px;
   height: 30px;
   flex: 0 0 auto;
@@ -404,10 +407,29 @@ details.rec[open] summary::before {
   display: grid;
   place-items: center;
   padding: 0;
+  transition:
+    background-color 140ms ease-out,
+    border-color 140ms ease-out;
+}
+.chk::after {
+  content: '';
+  position: absolute;
+  inset: -7px;
+}
+.chk:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
 }
 .chk.on {
   background: var(--accent);
   border-color: var(--accent);
+}
+.chk.on:hover {
+  background: var(--color-accent-600);
+  border-color: var(--color-accent-600);
+}
+.chk:active {
+  transform: scale(0.92);
 }
 .chk svg {
   width: 15px;
@@ -418,6 +440,7 @@ details.rec[open] summary::before {
   opacity: 0;
   stroke-linecap: round;
   stroke-linejoin: round;
+  transition: opacity 140ms ease-out;
 }
 .chk.on svg {
   opacity: 1;
@@ -425,6 +448,15 @@ details.rec[open] summary::before {
 .chk.mini {
   width: 26px;
   height: 26px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .chk,
+  .chk svg {
+    transition: none;
+  }
+  .chk:active {
+    transform: none;
+  }
 }
 
 .tag {
@@ -450,50 +482,71 @@ details.rec[open] summary::before {
 .progreso {
   display: flex;
   align-items: flex-end;
-  gap: 14px;
-  padding: 14px 0;
+  gap: 16px;
+  padding: 16px 0;
   border-bottom: 2px solid var(--line);
 }
 .progreso-num {
   flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0;
 }
 .progreso-num .kicker {
-  display: block;
+  flex: 1 0 100%;
+  margin-bottom: 2px;
 }
 .progreso-num strong {
   font-family: var(--font-heading);
   font-weight: var(--font-heading-weight);
-  font-size: 40px;
-  line-height: 1;
-  letter-spacing: -0.03em;
+  font-size: 44px;
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
 }
 .progreso-num em {
   font-style: normal;
   font-family: var(--font-heading);
   font-weight: var(--font-heading-weight);
   font-size: 16px;
+  color: var(--muted);
 }
 .progreso-num span {
   font-size: 12px;
   color: var(--muted);
-  margin-left: 6px;
+  margin-left: 8px;
+  font-variant-numeric: tabular-nums;
+}
+// Al completar el día la cifra pasa a acento: es la única recompensa visual que
+// admite el sistema, sin salirse del ink-on-ground.
+.progreso.completo .progreso-num strong,
+.progreso.completo .progreso-num em {
+  color: var(--accent);
 }
 .progreso-barra {
   flex: 1;
   display: flex;
   gap: 3px;
-  align-items: flex-end;
+  align-items: stretch;
   height: 34px;
 }
 .progreso-seg {
   flex: 1;
-  height: 100%;
   background: transparent;
   border: 2px solid var(--line);
+  transition:
+    background-color 180ms ease-out,
+    border-color 180ms ease-out;
 }
 .progreso-seg.on {
   background: var(--accent);
   border-color: var(--accent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .progreso-seg {
+    transition: none;
+  }
 }
 
 // Una ingesta: la hora en acento es el ancla de lectura de la fila.
@@ -519,6 +572,15 @@ details.rec[open] summary::before {
   flex: 1;
   font-size: 17px;
   letter-spacing: -0.01em;
+}
+// Una ingesta marcada retrocede: el detalle se atenúa y la hora deja el acento,
+// para que lo que queda por hacer sea lo único que tira de la vista.
+.ingesta.hecha .item,
+.ingesta.hecha .ingesta-h h3 {
+  opacity: 0.45;
+}
+.ingesta.hecha .ingesta-h .hora {
+  color: var(--muted);
 }
 
 // Panel de entrenamiento: la única banda con fondo de la pantalla. No lleva
@@ -715,6 +777,12 @@ details.rec[open] summary::before {
 .kpi strong.up {
   color: var(--warn);
 }
+.kpi-nota {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
 
 // Alta de peso: cifra grande, unidad y botón en una sola línea.
 .form-row {
@@ -760,6 +828,24 @@ table.pesos {
   width: 100%;
   border-collapse: collapse;
   font-size: 14px;
+}
+table.pesos th {
+  text-align: left;
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 6px 0;
+  border-bottom: 2px solid var(--line);
+}
+table.pesos th:nth-child(2),
+table.pesos th:nth-child(3) {
+  text-align: right;
+}
+table.pesos th:nth-child(2) {
+  padding-right: 10px;
 }
 // Fecha · variación · peso · borrar.
 table.pesos td {
@@ -843,6 +929,53 @@ table.pesos td:last-child {
   line-height: 1.5;
 }
 
+// ---------- ajustes ----------
+// Formulario del perfil: campos etiquetados en dos columnas cuando caben, con
+// la misma línea de 2px que el resto de inputs del sistema.
+.campo {
+  flex: 1 1 160px;
+  min-width: 0;
+  padding-top: 12px;
+}
+.campo label {
+  display: block;
+  margin-bottom: 2px;
+}
+.campo-fila {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.imc {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 12px 0 4px;
+}
+.imc strong {
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  font-size: 40px;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+.imc span {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+// Texto solo para lectores de pantalla.
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 // ---------- barra de acciones (exportar PDF / calendario) ----------
 .export-bar {
   display: flex;
@@ -863,8 +996,22 @@ table.pesos td:last-child {
 // A partir de 960px «Hoy» deja de ser una lista y pasa a ser un panel: titular
 // del día y progreso arriba a la izquierda, foto a la derecha, y debajo las
 // ingestas junto a una columna con entrenamiento y hábitos.
+// En móvil el hueco de foto solo existe si hay foto: `.con-foto` lo activa.
 .hoy-foto {
   display: none;
+}
+.hoy-foto.con-foto {
+  display: block;
+  margin: 16px 0 0;
+}
+.hoy-foto-pie {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 6px 0 14px;
+  border-bottom: 2px solid var(--line);
 }
 @media (min-width: 960px) {
   .hoy-grid {
@@ -879,17 +1026,25 @@ table.pesos td:last-child {
     padding: 22px 0;
     border-bottom: 2px solid var(--line);
   }
-  .hoy-foto {
+  .hoy-foto,
+  .hoy-foto.con-foto {
     grid-area: foto;
-    display: block;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
     border-bottom: 2px solid var(--line);
     border-left: 2px solid var(--line);
   }
   .hoy-foto .foto-placeholder,
   .hoy-foto .foto-container {
-    height: 100%;
+    flex: 1;
+    min-height: 0;
     aspect-ratio: auto;
     border: 0;
+  }
+  .hoy-foto-pie {
+    border-bottom: 0;
+    padding: 8px 0 10px 16px;
   }
   .hoy-ingestas {
     grid-area: ingestas;

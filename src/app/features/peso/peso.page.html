@@ -28,6 +28,13 @@
       {{ ritmo() === null ? '—' : (ritmo()! > 0 ? '+' : '') + num(ritmo()!) + ' kg' }}
     </strong>
   </div>
+  <div class="kpi">
+    <span>IMC</span>
+    <strong>{{ imc() ? imc()!.valor.toFixed(1) : '—' }}</strong>
+    @if (imc()) {
+      <small class="kpi-nota">{{ imc()!.categoria }}</small>
+    }
+  </div>
 </div>
 
 <section class="seccion">
@@ -76,18 +83,36 @@
   </h2>
   @if (filas().length) {
     <table class="pesos">
-      @for (f of filas(); track f.fecha) {
+      <thead>
         <tr>
-          <td>{{ fmtDia(f.fecha) }}</td>
-          <td class="delta" [class.down]="f.delta !== null && f.delta < 0">
-            @if (f.delta !== null) {
-              {{ (f.delta > 0 ? '+' : '') + num(f.delta) }}
-            }
-          </td>
-          <td>{{ num(f.peso) }} kg</td>
-          <td><button class="del" (click)="borrar(f.fecha)" aria-label="Borrar">×</button></td>
+          <th scope="col">Fecha</th>
+          <th scope="col">Variación</th>
+          <th scope="col">Peso</th>
+          <th scope="col"><span class="sr">Acciones</span></th>
         </tr>
-      }
+      </thead>
+      <tbody>
+        @for (f of filas(); track f.fecha) {
+          <tr>
+            <td>{{ fmtDia(f.fecha) }}</td>
+            <td class="delta" [class.down]="f.delta !== null && f.delta < 0">
+              @if (f.delta !== null) {
+                {{ (f.delta > 0 ? '+' : '') + num(f.delta) }}
+              }
+            </td>
+            <td>{{ num(f.peso) }} kg</td>
+            <td>
+              <button
+                class="del"
+                (click)="borrar(f.fecha)"
+                [attr.aria-label]="'Borrar el registro del ' + fmtDia(f.fecha)"
+              >
+                ×
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
     </table>
   } @else {
     <p class="empty">Todavía no hay registros.</p>

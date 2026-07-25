@@ -53,7 +53,7 @@ export class SemanaPage {
   }
 
   async ir(i: number): Promise<void> {
-    await this.nav.irADiaSemana(i, idxDia(this.nav.fecha()));
+    this.nav.irADiaSemana(i, idxDia(this.nav.fecha()));
     await this.router.navigate(['/hoy']);
   }
 

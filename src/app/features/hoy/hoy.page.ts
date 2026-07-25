@@ -4,13 +4,13 @@ import { DiaService } from '../../core/dia.service';
 import { NavegacionService } from '../../core/navegacion.service';
 import { ExportService } from '../../core/export.service';
 import { idxDia } from '../../domain/fecha.util';
-import { tieneReceta } from '../../domain/plan.types';
+import { fotoDelDia } from '../../domain/foto.calc';
+import { ORDEN_INGESTAS, tieneReceta } from '../../domain/plan.types';
 import type { IngestaKey } from '../../domain/plan.types';
 import { RecetaDetalle } from './receta-detalle';
 import { FotoPlaceholder } from '../../shared/foto-placeholder';
 import { FechaLargaPipe } from '../../shared/pipes/fecha-larga.pipe';
 
-const ORDEN: IngestaKey[] = ['desayuno', 'tentempie', 'comida', 'merienda', 'cena'];
 const NOMBRE_INGESTA: Record<IngestaKey, string> = {
   desayuno: 'Desayuno',
   tentempie: 'Tentempié',
@@ -41,9 +41,15 @@ export class HoyPage {
 
   readonly estado = computed(() => this.diaSvc.estado(this.nav.fechaIso()));
 
+  /** Foto de cabecera: la del día si el plan la trae, si no la del plato principal. */
+  readonly foto = computed(() => fotoDelDia(this.dia()));
+
   readonly ingestas = computed(() => {
     const d = this.dia();
-    return ORDEN.filter((k) => d.ingestas[k]).map((k) => ({ key: k, ingesta: d.ingestas[k]! }));
+    return ORDEN_INGESTAS.filter((k) => d.ingestas[k]).map((k) => ({
+      key: k,
+      ingesta: d.ingestas[k]!,
+    }));
   });
   readonly hechas = computed(
     () => this.ingestas().filter(({ key }) => this.estado().hechas[key]).length,

@@ -51,10 +51,20 @@ guardó.
 
 ---
 
-### 3. Rollback en actualizaciones optimistas
+### 3. Rollback en actualizaciones optimistas — ✅ HECHO
 
-**Problema:** `DiaService.guardar()` falla silenciosamente. El estado local se
-actualiza pero el remoto no — quedan desincronizados sin notificación.
+El rollback existía pero era demasiado agresivo: revertía ante *cualquier*
+rechazo de `setDoc`, incluidos los códigos transitorios (`unavailable`,
+`deadline-exceeded`…) que Firestore reintenta solo desde la caché persistente.
+Con red intermitente eso desmarcaba el check delante del usuario aunque el
+cambio acabara subiendo. Ahora solo se revierte ante errores definitivos
+(`permission-denied`, `unauthenticated`, `invalid-argument`, …) y los
+transitorios muestran un aviso de "se sincronizará al reconectar".
+Además `DiaService.cargar()` ya no cachea el estado vacío cuando la lectura
+falla, para que un fallo puntual no deje el día en blanco toda la sesión.
+
+**Problema original:** `DiaService.guardar()` falla silenciosamente. El estado
+local se actualiza pero el remoto no — quedan desincronizados sin notificación.
 
 **Ubicación:** `src/app/core/dia.service.ts:40-51` y `:59-65`
 
@@ -88,9 +98,15 @@ actualiza pero el remoto no — quedan desincronizados sin notificación.
 
 ---
 
-### 5. Pantalla de ajustes / edición de perfil
+### 5. Pantalla de ajustes / edición de perfil — ✅ HECHO
 
-**Problema:** El perfil (altura, peso inicial, fecha de inicio, objetivo) solo se
+`src/app/features/ajustes/` (ruta `/ajustes`, lazy) con el formulario del perfil
+validado, el IMC calculado en vivo con la altura que se está editando y el
+conmutador de tema. `PlanService.actualizarPerfil()` escribe el documento
+completo porque las reglas exigen exactamente esas cinco claves. Se entra por el
+icono de engranaje de la cabecera.
+
+**Problema original:** El perfil (altura, peso inicial, fecha de inicio, objetivo) solo se
 puede editar en la consola de Firestore. No hay pantalla de configuración.
 
 **Ubicación:**
@@ -144,9 +160,14 @@ recordatorios de pesaje, comidas ni entrenamiento.
 
 ---
 
-### 8. Gráficos avanzados y BMI
+### 8. Gráficos avanzados y BMI — ✅ HECHO (la parte de IMC)
 
-**Problema:** Solo hay un chart de peso. Con altura + peso disponibles, se podría
+`imc()` en `src/app/domain/peso.calc.ts` (pura, con tests) devuelve valor y
+categoría OMS, o `null` si falta el peso o la altura no es plausible. Se muestra
+como sexto KPI en la página de peso y en la de ajustes. Los charts de calorías,
+macros y tendencia de IMC siguen pendientes.
+
+**Problema original:** Solo hay un chart de peso. Con altura + peso disponibles, se podría
 calcular y mostrar IMC. No hay visualización de calorías, macros ni progreso de
 entrenamiento.
 
@@ -178,9 +199,12 @@ recetas (Web Share API), ni imprimir la lista de la compra.
 
 ---
 
-### 10. Constante `ORDEN` duplicada
+### 10. Constante `ORDEN` duplicada — ✅ HECHO
 
-**Problema:** `ORDEN: IngestaKey[]` está definida idéntica en dos archivos.
+Ahora es `ORDEN_INGESTAS` en `src/app/domain/plan.types.ts`, consumida por
+`compra.calc.ts` y `hoy.page.ts`.
+
+**Problema original:** `ORDEN: IngestaKey[]` está definida idéntica en dos archivos.
 
 **Ubicación:**
 - `src/app/domain/compra.calc.ts:7`
@@ -213,9 +237,16 @@ al logout. Si el usuario hace logout/login, se acumulan listeners.
 
 ---
 
-### 12. Accesibilidad (a11y)
+### 12. Accesibilidad (a11y) — 🟠 PARCIAL
 
-**Problema:** Varios elementos interactivos no siguen estándares de accesibilidad.
+Hecho: los toggles de Hoy llevan `role="checkbox"` + `aria-checked` + etiqueta,
+los enlaces de navegación llevan `aria-current="page"` vía
+`ariaCurrentWhenActive`, ambos `<nav>` tienen `aria-label`, el botón de borrar
+peso nombra la fecha y los checks tienen un objetivo táctil de 44 px.
+Pendiente: `<label for>` en el formulario de peso y `aria-pressed` en los pills
+de la lista de la compra.
+
+**Problema original:** Varios elementos interactivos no siguen estándares de accesibilidad.
 
 **Ubicación y detalles:**
 - `src/app/features/hoy/hoy.page.html:8,47` — checkboxes son `<button>` sin
@@ -300,9 +331,9 @@ sin contexto.
 
 ---
 
-### 17. Tabla de peso: encabezados semánticos
+### 17. Tabla de peso: encabezados semánticos — ✅ HECHO
 
-**Problema:** La tabla de registros no tiene `<thead>` ni `<th>`.
+**Problema original:** La tabla de registros no tiene `<thead>` ni `<th>`.
 
 **Ubicación:** `src/app/features/peso/peso.page.html:61-75`
 
@@ -360,6 +391,26 @@ sin un guard centralizado.
 - Reemplazar las 4 `!` por llamadas a este helper.
 
 **Esfuerzo:** Bajo
+
+---
+
+---
+
+### 21. Foto de cabecera del día — ✅ HECHO (falta cargar las URLs)
+
+**Problema:** el hueco de foto de la vista Hoy nunca mostraba una imagen: no se
+le pasaba `fotoUrl` y, además, `.hoy-foto` estaba oculto por debajo de 960 px,
+así que en móvil ni siquiera existía.
+
+**Hecho:** `fotoDelDia()` en `src/app/domain/foto.calc.ts` resuelve la foto del
+día leyendo primero `dia.fotoUrl` y cayendo si no en la `receta.fotoUrl` del
+plato principal (comida → cena → desayuno → merienda → tentempié). La vista Hoy
+la pinta con su pie, y en móvil el bloque solo ocupa sitio cuando hay foto real
+—un marcador punteado permanente era ruido—.
+
+**Pendiente:** las URLs viven en Firestore (`usuarios/{uid}/plan/actual`), no en
+el código. Hasta que no se rellene `dieta[i].fotoUrl` o
+`dieta[i].ingestas.comida.items[j].receta.fotoUrl` no habrá nada que mostrar.
 
 ---
 

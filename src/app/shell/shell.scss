@@ -65,6 +65,7 @@ header {
   font-size: 12px;
   color: var(--muted);
 }
+// Botones de icono de la cabecera: tema y ajustes comparten caja.
 .theme-toggle {
   flex: 0 0 auto;
   width: 34px;
@@ -75,6 +76,15 @@ header {
   border: 2px solid var(--line);
   border-radius: var(--radius);
   color: var(--text);
+  text-decoration: none;
+}
+.theme-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.theme-toggle.on {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 .theme-toggle svg {
   width: 17px;

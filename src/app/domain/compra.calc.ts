@@ -1,10 +1,8 @@
 // Agregación de la lista de la compra pura, sin dependencia del DOM. Portada
 // literalmente de legacy/public/js/app.js (vistaCompra + CATS + categoria).
 
-import type { DiaDieta, IngestaKey } from './plan.types';
-import { tieneReceta } from './plan.types';
-
-const ORDEN: IngestaKey[] = ['desayuno', 'tentempie', 'comida', 'merienda', 'cena'];
+import type { DiaDieta } from './plan.types';
+import { ORDEN_INGESTAS, tieneReceta } from './plan.types';
 
 const CATS: [RegExp, string][] = [
   [/naranja|plátano|melón|ciruela|cereza|fresa|frambuesa|arándano|aguacate/i, 'Fruta'],
@@ -74,7 +72,7 @@ export function agregarCompra(dieta: DiaDieta[], diasSel: Set<number>): GrupoCom
 
   dieta.forEach((dia, i) => {
     if (!diasSel.has(i)) return;
-    for (const k of ORDEN) {
+    for (const k of ORDEN_INGESTAS) {
       const ing = dia.ingestas[k];
       if (!ing) continue;
       for (const it of ing.items) {

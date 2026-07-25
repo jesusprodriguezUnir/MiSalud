@@ -1,0 +1,118 @@
+@let f = form();
+@let i = imcActual();
+
+<section class="seccion">
+  <h2 class="seccion-tit">Perfil</h2>
+
+  <div class="campo">
+    <label class="kicker" for="nombre">Nombre</label>
+    <input
+      id="nombre"
+      type="text"
+      [ngModel]="f.nombre"
+      (ngModelChange)="set('nombre', $event)"
+      name="nombre"
+      autocomplete="name"
+    />
+  </div>
+
+  <div class="campo-fila">
+    <div class="campo">
+      <label class="kicker" for="altura">Altura (cm)</label>
+      <input
+        id="altura"
+        type="number"
+        [ngModel]="f.alturaCm"
+        (ngModelChange)="setNumero('alturaCm', $event)"
+        name="alturaCm"
+        step="1"
+        min="100"
+        max="250"
+        inputmode="numeric"
+      />
+    </div>
+    <div class="campo">
+      <label class="kicker" for="inicio">Fecha de inicio</label>
+      <input
+        id="inicio"
+        type="date"
+        [ngModel]="f.fechaInicio"
+        (ngModelChange)="set('fechaInicio', $event)"
+        name="fechaInicio"
+      />
+    </div>
+  </div>
+
+  <div class="campo-fila">
+    <div class="campo">
+      <label class="kicker" for="pesoInicial">Peso inicial (kg)</label>
+      <input
+        id="pesoInicial"
+        type="number"
+        [ngModel]="f.pesoInicial"
+        (ngModelChange)="setNumero('pesoInicial', $event)"
+        name="pesoInicial"
+        step="0.1"
+        min="30"
+        max="200"
+        inputmode="decimal"
+      />
+    </div>
+    <div class="campo">
+      <label class="kicker" for="objetivo">Objetivo (kg)</label>
+      <input
+        id="objetivo"
+        type="number"
+        [ngModel]="f.objetivo"
+        (ngModelChange)="setNumero('objetivo', $event)"
+        name="objetivo"
+        step="0.1"
+        min="30"
+        max="200"
+        inputmode="decimal"
+      />
+    </div>
+  </div>
+
+  <div class="err">{{ error() }}</div>
+
+  <div class="export-bar">
+    <button class="btn mini" (click)="guardar()" [disabled]="guardando()">
+      {{ guardando() ? 'Guardando…' : 'Guardar perfil' }}
+    </button>
+    <button class="btn ghost mini" (click)="deshacer()" [disabled]="guardando()">Deshacer</button>
+  </div>
+</section>
+
+<section class="seccion">
+  <h2 class="seccion-tit">
+    Índice de masa corporal
+    @if (i) {
+      <span class="aparte">{{ i.categoria }}</span>
+    }
+  </h2>
+  @if (i) {
+    <div class="imc">
+      <strong>{{ i.valor.toFixed(1) }}</strong>
+      <span>calculado con tu último peso registrado y {{ f.alturaCm }} cm de altura</span>
+    </div>
+  } @else {
+    <p class="empty">Registra un peso y comprueba tu altura para ver el IMC.</p>
+  }
+</section>
+
+<section class="seccion">
+  <h2 class="seccion-tit">Apariencia</h2>
+  <div class="def">
+    <b>Tema</b>
+    <span>Claro u oscuro. Se recuerda en este dispositivo.</span>
+  </div>
+  <div class="export-bar">
+    <button class="btn ghost mini" (click)="theme.toggle()">{{ temaLabel() }}</button>
+  </div>
+</section>
+
+<div class="aviso">
+  Estos datos son la referencia de todos los cálculos de la pantalla de Peso: el peso inicial fija
+  el punto de partida y el objetivo, la meta. El IMC es orientativo y no distingue músculo de grasa.
+</div>

@@ -4,7 +4,6 @@ import { TitleCasePipe } from '@angular/common';
 import { AuthService } from '../core/auth.service';
 import { PlanService } from '../core/plan.service';
 import { PesoService } from '../core/peso.service';
-import { DiaService } from '../core/dia.service';
 import { NavegacionService } from '../core/navegacion.service';
 import { ConectividadService } from '../core/conectividad.service';
 import { ThemeService } from '../core/theme.service';
@@ -25,7 +24,6 @@ export class Shell {
   private readonly auth = inject(AuthService);
   private readonly planSvc = inject(PlanService);
   private readonly pesoSvc = inject(PesoService);
-  private readonly diaSvc = inject(DiaService);
   readonly nav = inject(NavegacionService);
   readonly conectividad = inject(ConectividadService);
   readonly theme = inject(ThemeService);
@@ -52,10 +50,11 @@ export class Shell {
     });
   }
 
+  // El estado del día lo precarga NavegacionService con un effect sobre la
+  // fecha visible, así que aquí solo quedan plan/perfil y el stream de pesos.
   private async arrancar(): Promise<void> {
     await this.planSvc.cargar();
     this.pesoSvc.escuchar();
-    await this.diaSvc.cargar(this.nav.fechaIso());
   }
 
   logout(): void {
