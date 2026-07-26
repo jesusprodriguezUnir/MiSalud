@@ -1,5 +1,5 @@
 @if (!conectividad.online()) {
-  <div class="offline">Sin conexión · los cambios se guardarán al volver</div>
+  <div class="offline" role="status">Sin conexión · los cambios se guardarán al volver</div>
 }
 
 <header>
@@ -21,6 +21,9 @@
         <span>{{ nav.fecha() | fechaLarga }}{{ nav.esHoy() ? ' · hoy' : '' }}</span>
       </div>
       <button class="nav" (click)="nav.mover(1)" aria-label="Día siguiente">›</button>
+      @if (!nav.esHoy()) {
+        <button class="btn-hoy" (click)="nav.irAHoy()" title="Volver al día de hoy">Hoy</button>
+      }
       <button
         class="theme-toggle"
         (click)="theme.toggle()"
@@ -59,7 +62,21 @@
 </header>
 
 <main class="wrap">
-  @if (listo()) {
+  @if (error(); as msg) {
+    <!-- Con la carga fallida los signals siguen teniendo la semilla local. Se
+         bloquea la UI a propósito: pintar el outlet enseñaría un plan que no es
+         el del usuario y le dejaría editarlo creyendo que sí lo es. -->
+    <div class="pantalla-error" role="alert">
+      <h2>No se han podido cargar tus datos</h2>
+      <p>{{ msg }}</p>
+      <p class="pista">
+        Comprueba tu conexión. Si acabas de iniciar sesión, puede que la sesión haya caducado.
+      </p>
+      <button class="btn" (click)="reintentar()" [disabled]="reintentando()">
+        {{ reintentando() ? 'Reintentando…' : 'Reintentar' }}
+      </button>
+    </div>
+  } @else if (listo()) {
     <router-outlet />
   } @else {
     <div class="esqueleto" aria-hidden="true">

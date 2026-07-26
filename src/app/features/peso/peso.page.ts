@@ -13,7 +13,10 @@ import { PlanService } from '../../core/plan.service';
 import { NavegacionService } from '../../core/navegacion.service';
 import { num } from '../../domain/fecha.util';
 import { imc } from '../../domain/peso.calc';
+import { PESO_MAX, PESO_MIN, pesoValido } from '../../domain/plan.types';
 import { PesoChart } from './peso-chart';
+import { DiaCortoPipe } from '../../shared/pipes/dia-corto.pipe';
+import { fmtDiaCorto } from '../../domain/fecha.util';
 
 interface FilaTabla {
   fecha: string;
@@ -24,7 +27,7 @@ interface FilaTabla {
 @Component({
   selector: 'app-peso',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, PesoChart],
+  imports: [FormsModule, PesoChart, DiaCortoPipe],
   templateUrl: './peso.page.html',
 })
 export class PesoPage {
@@ -35,6 +38,7 @@ export class PesoPage {
 
   readonly num = num;
   readonly pesos = this.pesoSvc.pesos;
+  readonly desconectado = this.pesoSvc.desconectado;
   readonly perfil = this.planSvc.perfil;
   readonly objetivos = computed(() => this.planSvc.plan().objetivos);
 
@@ -52,6 +56,11 @@ export class PesoPage {
   readonly fecha = linkedSignal(() => this.nav.fechaIso());
   pesoInput = '';
   readonly error = signal('');
+  /** True mientras hay un alta en vuelo: deshabilita el botón (anti doble tap). */
+  readonly guardando = signal(false);
+
+  readonly pesoMin = PESO_MIN;
+  readonly pesoMax = PESO_MAX;
 
   // Últimos 20 registros con su variación respecto al anterior.
   readonly filas = computed<FilaTabla[]>(() => {
@@ -62,38 +71,57 @@ export class PesoPage {
     });
   });
 
-  fmtDia(fecha: string): string {
-    return new Date(fecha).toLocaleDateString('es-ES', {
-      weekday: 'short',
-      day: 'numeric',
-      month: 'short',
-    });
+  private fmtDia(fecha: string): string {
+    return fmtDiaCorto(fecha);
+  }
+
+  reconectar(): void {
+    this.pesoSvc.reconectar();
   }
 
   async guardar(): Promise<void> {
+    if (this.guardando()) return;
     const fecha = this.fecha();
-    const v = parseFloat(String(this.pesoInput).replace(',', '.'));
-    if (!fecha || !Number.isFinite(v) || v < 30 || v > 200) {
-      this.error.set('Introduce una fecha y un peso válidos.');
+    const v = parseFloat(this.pesoInput.replace(',', '.'));
+    if (!fecha || !pesoValido(v)) {
+      this.error.set(`Introduce una fecha y un peso entre ${PESO_MIN} y ${PESO_MAX} kg.`);
       return;
     }
     this.error.set('');
-    this.pesoInput = '';
+    this.guardando.set(true);
     try {
       await this.pesoSvc.add(fecha, v);
+      // El input solo se vacía tras un alta que ha ido bien: si se limpiara
+      // antes del await, un fallo de escritura se llevaría por delante lo que
+      // el usuario acababa de teclear.
+      this.pesoInput = '';
     } catch (e) {
-      this.error.set('No se ha podido guardar.');
+      this.error.set('No se ha podido guardar. Revisa el dato e inténtalo de nuevo.');
       console.warn(e);
+    } finally {
+      this.guardando.set(false);
     }
   }
 
+  /**
+   * Borra el registro y ofrece deshacerlo durante unos segundos, en vez de
+   * bloquear con el `confirm()` nativo antes de borrar.
+   */
   async borrar(fecha: string): Promise<void> {
-    if (!confirm('¿Borrar este registro?')) return;
+    const previo = this.pesos().find((p) => p.fecha === fecha);
     try {
       await this.pesoSvc.borrar(fecha);
     } catch (e) {
       console.warn(e);
       this.avisos.mostrar('No se ha podido borrar el registro.');
+      return;
     }
+    if (!previo) return;
+    this.avisos.deshacer(`Registro del ${this.fmtDia(fecha)} borrado.`, () => {
+      void this.pesoSvc.add(previo.fecha, previo.peso).catch((e: unknown) => {
+        console.warn(e);
+        this.avisos.mostrar('No se ha podido restaurar el registro.');
+      });
+    });
   }
 }

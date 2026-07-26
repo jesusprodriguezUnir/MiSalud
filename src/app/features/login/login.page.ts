@@ -37,7 +37,7 @@ import { AuthService } from '../../core/auth.service';
         <button class="btn" type="submit" [disabled]="cargando()">
           <span>Entrar</span><span>→</span>
         </button>
-        <div class="err">{{ error() }}</div>
+        <div class="err" role="alert">{{ error() }}</div>
         <p class="nota">
           Los datos se guardan cifrados en tu cuenta. Funciona sin cobertura y sincroniza al volver.
         </p>

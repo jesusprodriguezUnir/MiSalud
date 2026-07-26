@@ -7,6 +7,7 @@
 // SDK rechazaría o que dejaría basura en el plan.
 // ---------------------------------------------------------------------------
 
+import { HORA_POR_DEFECTO } from './plan.types';
 import type {
   DiaDieta,
   DiaEntreno,
@@ -18,15 +19,6 @@ import type {
   Plan,
   Receta,
 } from './plan.types';
-
-/** Hora por defecto al crear una ingesta que el día aún no tenía. */
-const HORA_POR_DEFECTO: Record<IngestaKey, string> = {
-  desayuno: '08:30',
-  tentempie: '11:00',
-  comida: '14:00',
-  merienda: '17:30',
-  cena: '21:00',
-};
 
 export const NOMBRE_DIA = [
   'Lunes',
@@ -167,7 +159,13 @@ function limpiarIngesta(ing: Ingesta): Ingesta {
 function limpiarDiaDieta(d: DiaDieta): DiaDieta {
   const ingestas: Partial<Record<IngestaKey, Ingesta>> = {};
   for (const [k, ing] of Object.entries(d.ingestas) as [IngestaKey, Ingesta | undefined][]) {
-    if (ing) ingestas[k] = limpiarIngesta(ing);
+    if (!ing) continue;
+    const limpia = limpiarIngesta(ing);
+    // Una ingesta a la que se le han borrado todos los ítems se descarta entera,
+    // mismo criterio que con las filas sin rellenar: si se guardara, la vista Hoy
+    // pintaría una sección vacía con su hora y nada debajo.
+    if (limpia.items.length === 0) continue;
+    ingestas[k] = limpia;
   }
   return sinVacios({
     dia: d.dia,

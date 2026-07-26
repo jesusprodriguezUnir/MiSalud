@@ -5,15 +5,17 @@
       {{ todos() ? 'Ninguno' : 'Todos' }}
     </button>
   </h2>
-  <div class="compra-dias">
-    @for (d of dias; track $index; let i = $index) {
+  <div class="compra-dias" role="group" aria-label="Días incluidos en la lista">
+    @for (d of dias; track d.corto; let i = $index) {
       <button
         class="pill"
+        type="button"
         [class.on]="activo(i)"
         (click)="toggleDia(i)"
         [attr.aria-pressed]="activo(i)"
+        [attr.aria-label]="d.largo"
       >
-        {{ d }}
+        {{ d.corto }}
       </button>
     }
   </div>
@@ -21,6 +23,13 @@
 
 @if (!hayItems()) {
   <p class="empty">Selecciona al menos un día.</p>
+} @else {
+  <section class="seccion compra-estado">
+    <span class="kicker">{{ enCarro() }} de {{ totalItems() }} en el carro</span>
+    @if (enCarro() > 0) {
+      <button class="btn ghost mini" (click)="vaciarCarro()">Vaciar marcas</button>
+    }
+  </section>
 }
 
 <div class="compra-lista">
@@ -28,16 +37,22 @@
     <div class="compra-grupo">
       <h3 class="cat">{{ g.categoria }}</h3>
       @for (v of g.items; track v.n) {
-        <div class="item">
-          <div class="n">{{ v.n }}</div>
-          <div class="c">
+        <label class="item item-check" [class.comprado]="comprado(v.n)">
+          <input
+            type="checkbox"
+            [checked]="comprado(v.n)"
+            (change)="toggleComprado(v.n)"
+            [attr.aria-label]="'Marcar ' + v.n + ' como comprado'"
+          />
+          <span class="n">{{ v.n }}</span>
+          <span class="c">
             @if (v.g) {
               {{ num(v.g) }} g{{ v.aproximado ? ' +' : '' }}
             } @else {
               {{ v.veces }} ración{{ v.veces > 1 ? 'es' : '' }}
             }
-          </div>
-        </div>
+          </span>
+        </label>
       }
     </div>
   }
@@ -50,5 +65,5 @@
 <div class="aviso">
   Cantidades sumadas de las raciones del plan para los días marcados, incluyendo los ingredientes de
   cada receta. Añade un margen en fruta y verdura por mermas y en los formatos que solo se venden
-  por envase (latas, tarrinas, barras de pan).
+  por envase (latas, tarrinas, barras de pan). Las marcas del carro se guardan en este dispositivo.
 </div>

@@ -3,26 +3,19 @@ import { PlanService } from '../../core/plan.service';
 import { DiaService } from '../../core/dia.service';
 import { NavegacionService } from '../../core/navegacion.service';
 import { ExportService } from '../../core/export.service';
-import { idxDia } from '../../domain/fecha.util';
+import { diaSemana, idxDia } from '../../domain/fecha.util';
 import { fotoDelDia } from '../../domain/foto.calc';
-import { ORDEN_INGESTAS, tieneReceta } from '../../domain/plan.types';
+import { NOMBRE_INGESTA, ORDEN_INGESTAS, tieneReceta } from '../../domain/plan.types';
 import type { IngestaKey } from '../../domain/plan.types';
+import { RouterLink } from '@angular/router';
 import { RecetaDetalle } from './receta-detalle';
 import { FotoPlaceholder } from '../../shared/foto-placeholder';
 import { FechaLargaPipe } from '../../shared/pipes/fecha-larga.pipe';
 
-const NOMBRE_INGESTA: Record<IngestaKey, string> = {
-  desayuno: 'Desayuno',
-  tentempie: 'Tentempié',
-  comida: 'Comida',
-  merienda: 'Merienda',
-  cena: 'Cena',
-};
-
 @Component({
   selector: 'app-hoy',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RecetaDetalle, FotoPlaceholder, FechaLargaPipe],
+  imports: [RouterLink, RecetaDetalle, FotoPlaceholder, FechaLargaPipe],
   templateUrl: './hoy.page.html',
 })
 export class HoyPage {
@@ -63,10 +56,10 @@ export class HoyPage {
   readonly total = computed(() => this.segmentos().length);
   readonly hechasTotal = computed(() => this.segmentos().filter(Boolean).length);
   readonly pct = computed(() => Math.round((this.hechasTotal() / this.total()) * 100));
+  /** Todo lo del día marcado: dispara la micro-celebración de la cabecera. */
+  readonly completo = computed(() => this.total() > 0 && this.hechasTotal() === this.total());
 
-  readonly diaSemana = computed(() =>
-    this.nav.fecha().toLocaleDateString('es-ES', { weekday: 'long' }),
-  );
+  readonly diaSemana = computed(() => diaSemana(this.nav.fecha()));
 
   toggleEntreno(): void {
     void this.diaSvc.toggleEntreno(this.nav.fechaIso());

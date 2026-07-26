@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, input, computed } from '@angular/core';
-import { escalaChart } from '../../domain/peso.calc';
+import { escalaChart, mediaMovil, ritmoSemanal } from '../../domain/peso.calc';
+import { num } from '../../domain/fecha.util';
 import type { Peso } from '../../domain/plan.types';
 
 // Gráfica de evolución del peso: peso diario (línea tenue + puntos), media móvil
@@ -10,7 +11,13 @@ import type { Peso } from '../../domain/plan.types';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (esc(); as e) {
-      <svg class="chart" [attr.viewBox]="'0 0 ' + e.W + ' ' + e.H" preserveAspectRatio="none">
+      <svg
+        class="chart"
+        role="img"
+        [attr.aria-label]="resumen()"
+        [attr.viewBox]="'0 0 ' + e.W + ' ' + e.H"
+        preserveAspectRatio="none"
+      >
         @for (t of e.ticks; track t.v) {
           <line
             [attr.x1]="e.P.l"
@@ -78,6 +85,7 @@ import type { Peso } from '../../domain/plan.types';
           stroke-linecap="round"
         />
       </svg>
+      <p class="sr">{{ resumen() }}</p>
     } @else {
       <p class="empty">Registra al menos dos pesos para ver la tendencia.</p>
     }
@@ -109,6 +117,31 @@ export class PesoChart {
     return e.mm
       .map((p, i) => `${i ? 'L' : 'M'}${e.x(p.fecha).toFixed(1)},${e.y(p.peso).toFixed(1)}`)
       .join(' ');
+  });
+
+  /**
+   * Equivalente textual de la gráfica: un SVG de líneas no dice nada a un lector
+   * de pantalla, así que se resume lo que se ve —rango, extremos y ritmo—.
+   */
+  readonly resumen = computed(() => {
+    const ps = this.pesos();
+    if (ps.length < 2) return 'Gráfica de evolución del peso, sin datos suficientes.';
+
+    const primero = ps[0];
+    const ultimo = ps[ps.length - 1];
+    const r = ritmoSemanal(mediaMovil(ps));
+    const partes = [
+      `Gráfica de evolución del peso del ${this.fx(primero.fecha)} al ${this.fx(ultimo.fecha)}`,
+      `de ${num(primero.peso)} a ${num(ultimo.peso)} kilos`,
+    ];
+
+    if (r === null || Math.abs(r) < 0.05) partes.push('sin tendencia clara');
+    else partes.push(`${r < 0 ? 'bajando' : 'subiendo'} ${num(Math.abs(r))} kilos por semana`);
+
+    const o = this.objetivo();
+    if (o !== undefined) partes.push(`objetivo ${num(o)} kilos`);
+
+    return `${partes.join(', ')}.`;
   });
 
   fx(fecha: string): string {

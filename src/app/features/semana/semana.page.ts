@@ -1,11 +1,24 @@
 import { Component, ChangeDetectionStrategy, inject, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { PlanService } from '../../core/plan.service';
+import { DiaService } from '../../core/dia.service';
 import { NavegacionService } from '../../core/navegacion.service';
 import { ExportService } from '../../core/export.service';
-import { idxDia } from '../../domain/fecha.util';
-import { tieneReceta } from '../../domain/plan.types';
-import type { DiaDieta } from '../../domain/plan.types';
+import { idxDia, iso } from '../../domain/fecha.util';
+import { progresoDia, resumenCena, resumenComida, tituloCorto } from '../../domain/semana.calc';
+import type { ProgresoDia } from '../../domain/semana.calc';
+
+interface FilaSemana {
+  i: number;
+  dia: string;
+  tituloEntreno: string;
+  esFuerza: boolean;
+  comida: string;
+  cena: string;
+  progreso: ProgresoDia;
+  esHoy: boolean;
+  esSeleccionado: boolean;
+}
 
 // Resumen semanal: una tarjeta por día con comida y cena. Al pulsar salta al día
 // correspondiente de la semana mostrada y navega a Hoy (igual que la app vanilla).
@@ -16,40 +29,43 @@ import type { DiaDieta } from '../../domain/plan.types';
 })
 export class SemanaPage {
   private readonly planSvc = inject(PlanService);
+  private readonly diaSvc = inject(DiaService);
   private readonly nav = inject(NavegacionService);
   private readonly router = inject(Router);
   private readonly exportSvc = inject(ExportService);
 
-  readonly hoyI = idxDia(new Date());
-  readonly dieta = computed(() => this.planSvc.plan().dieta);
-  readonly entreno = computed(() => this.planSvc.plan().entreno);
+  /**
+   * Una fila por día con todo lo que la plantilla necesita. El progreso sale de
+   * `DiaService`, que solo tiene en caché los días ya visitados: para los demás
+   * queda en 0/n, que es información honesta (no se va a red por siete días solo
+   * para pintar una barrita).
+   */
+  readonly filas = computed<FilaSemana[]>(() => {
+    const plan = this.planSvc.plan();
+    const iActual = idxDia(this.nav.fecha());
+    const hoyI = idxDia(new Date());
 
-  tituloCorto(i: number): string {
-    return this.entreno()[i].titulo.split(' · ')[0];
-  }
-  esFuerza(i: number): boolean {
-    return this.entreno()[i].tipo === 'fuerza';
-  }
+    return plan.dieta.map((d, i) => {
+      const entreno = plan.entreno[i];
+      return {
+        i,
+        dia: d.dia,
+        tituloEntreno: tituloCorto(entreno?.titulo ?? ''),
+        esFuerza: entreno?.tipo === 'fuerza',
+        comida: resumenComida(d),
+        cena: resumenCena(d),
+        progreso: progresoDia(d, this.diaSvc.estado(this.isoDeDia(i, iActual))),
+        esHoy: i === hoyI,
+        esSeleccionado: i === iActual,
+      };
+    });
+  });
 
-  resumenComida(dia: DiaDieta): string {
-    const items = dia.ingestas.comida?.items ?? [];
-    const platos = items.filter(tieneReceta).map((x) => x.n);
-    return platos.length
-      ? platos.join(' · ')
-      : items
-          .map((x) => x.n)
-          .slice(0, 2)
-          .join(' · ');
-  }
-  resumenCena(dia: DiaDieta): string {
-    const items = (dia.ingestas.cena?.items ?? []).filter((x) => x.n !== 'Agua');
-    const platos = items.filter(tieneReceta).map((x) => x.n);
-    return platos.length
-      ? platos.join(' · ')
-      : items
-          .map((x) => x.n)
-          .slice(0, 3)
-          .join(' · ');
+  /** Fecha del día `i` de la semana que se está mirando. */
+  private isoDeDia(i: number, iActual: number): string {
+    const d = new Date(this.nav.fecha());
+    d.setDate(d.getDate() + (i - iActual));
+    return iso(d);
   }
 
   async ir(i: number): Promise<void> {

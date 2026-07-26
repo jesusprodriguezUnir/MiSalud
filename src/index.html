@@ -2,9 +2,10 @@
 <html lang="es">
   <head>
     <meta charset="utf-8" />
-    <title>Plan de Jesús</title>
+    <title>MiSalud</title>
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="Dieta, entrenamiento y peso. Un plan, un día a la vez." />
     <meta name="theme-color" content="#ec3013" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#ff563c" media="(prefers-color-scheme: dark)" />
     <script>
@@ -18,12 +19,19 @@
       })();
     </script>
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-title" content="Plan Jesús" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="MiSalud" />
     <link rel="manifest" href="manifest.webmanifest" />
     <link
       rel="icon"
       href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥗</text></svg>"
     />
+    <!-- iOS ignora los iconos del manifest: sin apple-touch-icon, "Añadir a la
+         pantalla de inicio" usa una captura borrosa de la página. -->
+    <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192x192.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="144x144" href="icons/icon-144x144.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -33,6 +41,6 @@
   </head>
   <body>
     <app-root></app-root>
-    <noscript>Please enable JavaScript to continue using this application.</noscript>
+    <noscript>Necesitas activar JavaScript para usar MiSalud.</noscript>
   </body>
 </html>

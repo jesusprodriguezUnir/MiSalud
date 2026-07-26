@@ -38,20 +38,49 @@ service cloud.firestore {
       }
 
       // pesos/{yyyy-mm-dd}
+      //
+      // `data.fecha` tiene que coincidir con el id del documento: PesoService
+      // ordena el stream con orderBy('fecha') y tanto la gráfica como la media
+      // móvil dan ese orden por supuesto. Un documento con id 2026-06-01 y
+      // fecha 2030-01-01 los desordenaba en silencio.
+      //
+      // El rango 30–200 está también en `PESO_MIN`/`PESO_MAX` de
+      // `src/app/domain/plan.types.ts` (las reglas no pueden importar): si se
+      // cambia aquí, hay que cambiarlo allí.
       match /pesos/{fecha} {
         allow read: if request.auth != null && request.auth.uid == uid;
         allow write: if request.auth != null && request.auth.uid == uid
+                     && fecha.matches('^\\d{4}-\\d{2}-\\d{2}$')
+                     && request.resource.data.keys().hasOnly(['fecha','peso','ts'])
+                     && request.resource.data.keys().hasAll(['fecha','peso'])
+                     && request.resource.data.fecha == fecha
                      && request.resource.data.peso is number
                      && request.resource.data.peso > 30
-                     && request.resource.data.peso < 200
-                     && fecha.matches('^\\d{4}-\\d{2}-\\d{2}$');
+                     && request.resource.data.peso < 200;
         allow delete: if request.auth != null && request.auth.uid == uid;
       }
 
-      // dias/{yyyy-mm-dd} — checks de comidas y entreno
+      // dias/{yyyy-mm-dd} — checks de comidas y entreno.
+      //
+      // `hechas` solo admite las cinco claves de `IngestaKey`: sin el hasOnly,
+      // un cliente podía meter claves arbitrarias en un documento que el tipo
+      // `EstadoDia` describe como cerrado. Se escribe con merge, así que
+      // `fecha` puede no venir en la escritura, pero si viene debe cuadrar con
+      // el id.
       match /dias/{fecha} {
-        allow read, write: if request.auth != null && request.auth.uid == uid
-                           && fecha.matches('^\\d{4}-\\d{2}-\\d{2}$');
+        allow read: if request.auth != null && request.auth.uid == uid;
+        allow write: if request.auth != null && request.auth.uid == uid
+                     && fecha.matches('^\\d{4}-\\d{2}-\\d{2}$')
+                     && request.resource.data.keys().hasOnly(['fecha','hechas','entreno'])
+                     && (!('fecha' in request.resource.data)
+                         || request.resource.data.fecha == fecha)
+                     && (!('entreno' in request.resource.data)
+                         || request.resource.data.entreno is bool)
+                     && (!('hechas' in request.resource.data)
+                         || (request.resource.data.hechas is map
+                             && request.resource.data.hechas.keys().hasOnly(
+                                  ['desayuno','tentempie','comida','merienda','cena'])));
+        allow delete: if request.auth != null && request.auth.uid == uid;
       }
     }
 

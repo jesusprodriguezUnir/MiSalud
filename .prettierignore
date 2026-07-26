@@ -1,0 +1,10 @@
+# Generado por npm: reformatearlo solo produce diffs ruidosos.
+package-lock.json
+
+# Salidas de build y cobertura.
+dist/
+coverage/
+reports/
+
+# La app vanilla original se conserva como referencia histórica, tal cual estaba.
+legacy/

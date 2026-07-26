@@ -9,14 +9,14 @@ Reescrita en **Angular 20** (componentes standalone + signals, TypeScript estric
 
 ## Arquitectura
 
-| Pieza | Decisión | Motivo |
-|---|---|---|
-| Front | Angular 20, standalone components, signals, sin NgRx | Estado en servicios `providedIn: 'root'`; son 4 colecciones y una pantalla, NgRx sobraría |
-| Datos | Firestore con `persistentLocalCache` + multi-tab | Funciona en el metro y en la cocina sin cobertura; sincroniza al volver |
-| Auth | Email/password, persistencia local | Mismo usuario en móvil y portátil sin volver a entrar |
-| Plan | Semilla en `plan.seed.ts` → `usuarios/{uid}/plan/actual` | Arranca sin configurar nada, pero luego se edita en Firestore sin redesplegar |
-| Gráfica | SVG declarativo (componente `peso-chart`) | Sin dependencia CDN para dibujar dos polilíneas; funciona offline |
-| PWA | `@angular/service-worker` para el app shell | La caché de datos la sigue dando Firestore; el SW no toca Firestore |
+| Pieza   | Decisión                                                 | Motivo                                                                                    |
+| ------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Front   | Angular 20, standalone components, signals, sin NgRx     | Estado en servicios `providedIn: 'root'`; son 4 colecciones y una pantalla, NgRx sobraría |
+| Datos   | Firestore con `persistentLocalCache` + multi-tab         | Funciona en el metro y en la cocina sin cobertura; sincroniza al volver                   |
+| Auth    | Email/password, persistencia local                       | Mismo usuario en móvil y portátil sin volver a entrar                                     |
+| Plan    | Semilla en `plan.seed.ts` → `usuarios/{uid}/plan/actual` | Arranca sin configurar nada, pero luego se edita en Firestore sin redesplegar             |
+| Gráfica | SVG declarativo (componente `peso-chart`)                | Sin dependencia CDN para dibujar dos polilíneas; funciona offline                         |
+| PWA     | `@angular/service-worker` para el app shell              | La caché de datos la sigue dando Firestore; el SW no toca Firestore                       |
 
 ### Estructura
 
@@ -50,7 +50,7 @@ Necesitas **Node 22+**. Instala dependencias con `npm ci`.
 
 1. Crea el proyecto en <https://console.firebase.google.com> (plan Spark gratuito sobra).
 2. **Authentication → Sign-in method → Correo electrónico/contraseña**, y crea el usuario de Jesús en
-   la pestaña *Users*.
+   la pestaña _Users_.
 3. **Firestore Database** en modo producción, región `eur3` (Europa).
 4. **Registra una app web** y pega el objeto de configuración en
    [`src/environments/environment.ts`](src/environments/environment.ts) **y** en
@@ -87,7 +87,7 @@ En CI, cada push a `main` ejecuta `test → test:rules → build` y despliega a 
 (ver [`.github/workflows/ci.yml`](.github/workflows/ci.yml)). Requiere el secret
 `FIREBASE_SERVICE_ACCOUNT` con el JSON de la cuenta de servicio.
 
-En el móvil, abre la URL de Hosting y *Añadir a pantalla de inicio*.
+En el móvil, abre la URL de Hosting y _Añadir a pantalla de inicio_.
 
 ## Seguridad
 

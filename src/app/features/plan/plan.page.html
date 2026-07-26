@@ -9,50 +9,39 @@
     }
   </h2>
 
-  <div class="compra-dias plan-tabs" role="tablist" aria-label="Parte del plan">
-    <button
-      class="pill"
-      role="tab"
-      [class.on]="pestana() === 'dieta'"
-      [attr.aria-selected]="pestana() === 'dieta'"
-      (click)="pestana.set('dieta')"
-    >
-      Dieta
-    </button>
-    <button
-      class="pill"
-      role="tab"
-      [class.on]="pestana() === 'entreno'"
-      [attr.aria-selected]="pestana() === 'entreno'"
-      (click)="pestana.set('entreno')"
-    >
-      Entreno
-    </button>
-    <button
-      class="pill"
-      role="tab"
-      [class.on]="pestana() === 'habitos'"
-      [attr.aria-selected]="pestana() === 'habitos'"
-      (click)="pestana.set('habitos')"
-    >
-      Hábitos
-    </button>
-    <button
-      class="pill"
-      role="tab"
-      [class.on]="pestana() === 'objetivos'"
-      [attr.aria-selected]="pestana() === 'objetivos'"
-      (click)="pestana.set('objetivos')"
-    >
-      Objetivos
-    </button>
+  <!-- Grupo de botones con `aria-pressed`, no un tablist: el patrón tab completo
+       exige aria-controls, roving tabindex y navegación con flechas, y a medias
+       confunde más al lector de pantalla que un simple grupo de conmutadores. -->
+  <div class="compra-dias plan-tabs" role="group" aria-label="Parte del plan">
+    @for (p of pestanas; track p.key) {
+      <button
+        class="pill"
+        type="button"
+        [class.on]="pestana() === p.key"
+        [attr.aria-pressed]="pestana() === p.key"
+        (click)="pestana.set(p.key)"
+      >
+        {{ p.etiqueta }}
+      </button>
+    }
   </div>
 
   @if (pestana() === 'dieta' || pestana() === 'entreno') {
-    <div class="compra-dias plan-dias">
+    <div class="compra-dias plan-dias" role="group" aria-label="Día de la semana">
       @for (nombre of nombreDia; track nombre) {
-        <button class="pill" [class.on]="diaSel() === $index" (click)="diaSel.set($index)">
+        <button
+          class="pill"
+          type="button"
+          [class.on]="diaSel() === $index"
+          [class.incompleto]="diaIncompleto($index)"
+          [attr.aria-pressed]="diaSel() === $index"
+          [attr.aria-label]="nombre + (diaIncompleto($index) ? ' · día incompleto' : '')"
+          (click)="diaSel.set($index)"
+        >
           {{ nombre }}
+          @if (diaIncompleto($index)) {
+            <span class="punto" aria-hidden="true">•</span>
+          }
         </button>
       }
     </div>
@@ -119,27 +108,16 @@
           <div class="edit-item">
             <div class="edit-item-h">
               <span class="kicker">Alimento {{ $index + 1 }}</span>
-              <div class="edit-acciones">
-                <button
-                  class="del"
-                  (click)="moverItem(row.key, $index, -1)"
-                  [disabled]="$first"
-                  aria-label="Subir"
-                >
-                  ↑
-                </button>
-                <button
-                  class="del"
-                  (click)="moverItem(row.key, $index, 1)"
-                  [disabled]="$last"
-                  aria-label="Bajar"
-                >
-                  ↓
-                </button>
-                <button class="del" (click)="borrarItem(row.key, $index)" aria-label="Borrar">
-                  ✕
-                </button>
-              </div>
+              <app-edit-acciones
+                tipo="alimento"
+                [posicion]="$index + 1"
+                [contexto]="nombreIngesta[row.key]"
+                [primero]="$first"
+                [ultimo]="$last"
+                (subir)="moverItem(row.key, $index, -1)"
+                (bajar)="moverItem(row.key, $index, 1)"
+                (borrar)="borrarItem(row.key, $index, it.n)"
+              />
             </div>
 
             <div class="campo-fila">
@@ -287,25 +265,16 @@
       <div class="edit-item">
         <div class="edit-item-h">
           <span class="kicker">Bloque {{ $index + 1 }}</span>
-          <div class="edit-acciones">
-            <button
-              class="del"
-              (click)="moverBloque($index, -1)"
-              [disabled]="$first"
-              aria-label="Subir"
-            >
-              ↑
-            </button>
-            <button
-              class="del"
-              (click)="moverBloque($index, 1)"
-              [disabled]="$last"
-              aria-label="Bajar"
-            >
-              ↓
-            </button>
-            <button class="del" (click)="borrarBloque($index)" aria-label="Borrar">✕</button>
-          </div>
+          <app-edit-acciones
+            tipo="bloque"
+            [posicion]="$index + 1"
+            [contexto]="ent.titulo || ent.dia"
+            [primero]="$first"
+            [ultimo]="$last"
+            (subir)="moverBloque($index, -1)"
+            (bajar)="moverBloque($index, 1)"
+            (borrar)="borrarBloque($index, b.t)"
+          />
         </div>
 
         <div class="campo">
@@ -358,25 +327,15 @@
       <div class="edit-item">
         <div class="edit-item-h">
           <span class="kicker">Hábito {{ $index + 1 }}</span>
-          <div class="edit-acciones">
-            <button
-              class="del"
-              (click)="moverHabito($index, -1)"
-              [disabled]="$first"
-              aria-label="Subir"
-            >
-              ↑
-            </button>
-            <button
-              class="del"
-              (click)="moverHabito($index, 1)"
-              [disabled]="$last"
-              aria-label="Bajar"
-            >
-              ↓
-            </button>
-            <button class="del" (click)="borrarHabito($index)" aria-label="Borrar">✕</button>
-          </div>
+          <app-edit-acciones
+            tipo="hábito"
+            [posicion]="$index + 1"
+            [primero]="$first"
+            [ultimo]="$last"
+            (subir)="moverHabito($index, -1)"
+            (bajar)="moverHabito($index, 1)"
+            (borrar)="borrarHabito($index, h.t)"
+          />
         </div>
         <div class="campo">
           <label class="kicker" [for]="'hab-t-' + $index">Título</label>
@@ -414,25 +373,15 @@
       <div class="edit-item">
         <div class="edit-item-h">
           <span class="kicker">Objetivo {{ $index + 1 }}</span>
-          <div class="edit-acciones">
-            <button
-              class="del"
-              (click)="moverObjetivo($index, -1)"
-              [disabled]="$first"
-              aria-label="Subir"
-            >
-              ↑
-            </button>
-            <button
-              class="del"
-              (click)="moverObjetivo($index, 1)"
-              [disabled]="$last"
-              aria-label="Bajar"
-            >
-              ↓
-            </button>
-            <button class="del" (click)="borrarObjetivo($index)" aria-label="Borrar">✕</button>
-          </div>
+          <app-edit-acciones
+            tipo="objetivo"
+            [posicion]="$index + 1"
+            [primero]="$first"
+            [ultimo]="$last"
+            (subir)="moverObjetivo($index, -1)"
+            (bajar)="moverObjetivo($index, 1)"
+            (borrar)="borrarObjetivo($index, o.t)"
+          />
         </div>
         <div class="campo">
           <label class="kicker" [for]="'obj-t-' + $index">Título</label>
@@ -461,7 +410,7 @@
   </section>
 }
 
-<div class="err">{{ error() }}</div>
+<div class="err" role="alert">{{ error() }}</div>
 
 <!-- Barra de guardado: fija abajo para no tener que subir tras editar un día. -->
 <div class="plan-barra">

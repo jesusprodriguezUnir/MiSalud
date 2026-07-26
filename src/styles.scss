@@ -43,7 +43,10 @@
   --color-neutral-300: #d7d3d3;
   --color-neutral-400: #bab6b6;
   --color-neutral-500: #9b9797;
-  --color-neutral-600: #7d7979;
+  // #7d7979 sobre el fondo claro daba ~3,9:1, por debajo del 4.5:1 que exige
+  // WCAG AA para texto pequeño — y este es justo el token de `.kicker` (11 px),
+  // `.item .c` (12 px), `.empty` y las fechas. Oscurecido a ~4,8:1.
+  --color-neutral-600: #6a6666;
   --color-neutral-700: #605d5d;
   --color-neutral-800: #444141;
   --color-neutral-900: #2d2b2b;
@@ -233,8 +236,16 @@ select:focus-visible {
   font-size: 14px;
   width: 100%;
 }
-.btn:active {
+.btn:active:not(:disabled) {
   transform: translateY(1px);
+}
+// Sin esto, "Entrar" mientras carga, "Guardar plan" y "Guardar perfil" se veían
+// exactamente igual deshabilitados que activos: el usuario no sabía si su tap
+// había hecho algo. Vale para cualquier botón de la app, no solo para .btn.
+.btn:disabled,
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 .btn.ghost {
   background: transparent;
@@ -907,11 +918,19 @@ table.pesos td:last-child {
   width: 34px;
 }
 .del {
+  position: relative;
   background: none;
   border: 0;
   color: var(--muted);
   font-size: 16px;
   padding: 2px 6px;
+}
+// El botón mide ~24 px: se le da un área táctil de 44 px con un ::after
+// invisible, el mismo truco que ya usaba `.chk`, sin alterar la maquetación.
+.del::after {
+  content: '';
+  position: absolute;
+  inset: -10px;
 }
 
 // ---------- compra ----------
@@ -921,14 +940,33 @@ table.pesos td:last-child {
   gap: 6px;
 }
 .pill {
+  position: relative;
   font-size: 12px;
   font-family: var(--font-heading);
   font-weight: var(--font-heading-weight);
-  padding: 6px 10px;
+  // 12 px verticales sobre 12 px de texto dejan la pastilla en ~40 px de alto;
+  // con el ::after de abajo el área táctil llega a los 44 px recomendados.
+  padding: 9px 12px;
+  min-width: 40px;
   border-radius: var(--radius);
   border: 2px solid var(--line);
   background: transparent;
   color: var(--text);
+}
+.pill::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+}
+// Marca de "día sin comidas" en el editor de plan.
+.pill .punto {
+  color: var(--warn);
+  font-size: 14px;
+  line-height: 0;
+  vertical-align: middle;
+}
+.pill.on .punto {
+  color: var(--bg);
 }
 .pill.on {
   background: var(--accent);
@@ -1124,6 +1162,119 @@ table.pesos td:last-child {
   .compra-lista .compra-grupo {
     break-inside: avoid;
   }
+}
+
+// ---------- estados de error y de carga bloqueante ----------
+// Pantalla que sustituye al contenido cuando el plan no se ha podido cargar.
+.pantalla-error {
+  border: 2px solid var(--warn);
+  padding: 24px 18px;
+  margin: 24px 0;
+  max-width: 520px;
+}
+.pantalla-error h2 {
+  font-size: 22px;
+  margin-bottom: 10px;
+}
+.pantalla-error p {
+  font-size: 14px;
+  margin: 0 0 8px;
+}
+.pantalla-error .pista {
+  color: var(--muted);
+  font-size: 13px;
+  margin-bottom: 18px;
+}
+.pantalla-error .btn {
+  width: auto;
+}
+
+// Banda de aviso dentro de una pantalla (stream caído, por ejemplo).
+.banda-error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  border: 2px solid var(--warn);
+  padding: 10px 12px;
+  margin: 12px 0;
+  font-size: 13px;
+}
+.banda-error span {
+  flex: 1 1 220px;
+}
+
+// ---------- fila de registro de peso ----------
+// Fecha y peso en una sola fila: antes la fecha se comía una línea entera en
+// móvil y el formulario ocupaba tres alturas de campo.
+.form-row .input-fecha {
+  flex: 1 1 140px;
+  min-width: 130px;
+  margin-bottom: 0;
+  font-size: 14px;
+}
+
+// ---------- progreso ----------
+.progreso-hecho {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  margin: 6px 0 0;
+}
+
+// Mini-indicador de cumplimiento en las filas de la semana.
+.progreso-mini {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.progreso-mini .barra {
+  flex: 1;
+  height: 4px;
+  background: var(--line-soft);
+  overflow: hidden;
+}
+.progreso-mini .barra i {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+.progreso-mini .cifra {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+.dia-fila.sel {
+  border-left: 3px solid var(--accent);
+}
+
+// ---------- lista de la compra: marcar lo que ya está en el carro ----------
+.compra-estado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.item-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+.item-check input[type='checkbox'] {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  accent-color: var(--accent);
+}
+.item-check .n {
+  flex: 1;
+}
+.item-check.comprado .n,
+.item-check.comprado .c {
+  text-decoration: line-through;
+  color: var(--muted);
 }
 
 // ---------- reglas de impresión (PDF) ----------

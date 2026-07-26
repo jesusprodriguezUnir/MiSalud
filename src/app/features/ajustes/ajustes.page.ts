@@ -5,6 +5,7 @@ import { PlanService } from '../../core/plan.service';
 import { ThemeService } from '../../core/theme.service';
 import { imc } from '../../domain/peso.calc';
 import { PesoService } from '../../core/peso.service';
+import { ALTURA_MAX, ALTURA_MIN, PESO_MAX, PESO_MIN } from '../../domain/plan.types';
 import type { Perfil } from '../../domain/plan.types';
 
 // Edición del perfil (nombre, altura, peso inicial, fecha de inicio y objetivo).
@@ -40,18 +41,18 @@ export class AjustesPage {
   }
 
   setNumero(campo: 'alturaCm' | 'pesoInicial' | 'objetivo', valor: string): void {
-    this.set(campo, parseFloat(String(valor).replace(',', '.')));
+    this.set(campo, parseFloat(valor.replace(',', '.')));
   }
 
   async guardar(): Promise<void> {
     const f = this.form();
     if (!f.nombre.trim()) return this.error.set('Escribe un nombre.');
-    if (!(f.alturaCm >= 100 && f.alturaCm <= 250))
-      return this.error.set('La altura debe estar entre 100 y 250 cm.');
-    if (!(f.pesoInicial >= 30 && f.pesoInicial <= 200))
-      return this.error.set('El peso inicial debe estar entre 30 y 200 kg.');
-    if (!(f.objetivo >= 30 && f.objetivo <= 200))
-      return this.error.set('El objetivo debe estar entre 30 y 200 kg.');
+    if (!(f.alturaCm >= ALTURA_MIN && f.alturaCm <= ALTURA_MAX))
+      return this.error.set(`La altura debe estar entre ${ALTURA_MIN} y ${ALTURA_MAX} cm.`);
+    if (!(f.pesoInicial > PESO_MIN && f.pesoInicial < PESO_MAX))
+      return this.error.set(`El peso inicial debe estar entre ${PESO_MIN} y ${PESO_MAX} kg.`);
+    if (!(f.objetivo > PESO_MIN && f.objetivo < PESO_MAX))
+      return this.error.set(`El objetivo debe estar entre ${PESO_MIN} y ${PESO_MAX} kg.`);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(f.fechaInicio))
       return this.error.set('Indica la fecha de inicio.');
 

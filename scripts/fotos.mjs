@@ -13,9 +13,9 @@
 
 import { initializeApp, cert, applicationDefault } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
-import { getAuth } from 'firebase-admin/auth';
-import { readFileSync, readdirSync } from 'node:fs';
-import ts from 'typescript';
+import { credencialesJson, PROJECT_ID } from './lib/credenciales.mjs';
+import { cargarPlanSeed } from './lib/seed.mjs';
+import { resolverUid } from './lib/uid.mjs';
 
 const args = process.argv.slice(2);
 const inputArg = args.find((a) => !a.startsWith('--'));
@@ -28,43 +28,21 @@ if (!inputArg) {
 }
 
 const emulador = !!process.env.FIRESTORE_EMULATOR_HOST;
-const projectId = process.env.GCLOUD_PROJECT || process.env.GOOGLE_CLOUD_PROJECT || 'misalud-133ef';
+const projectId = PROJECT_ID;
 
-// Mismo descubrimiento de credenciales que scripts/seed.mjs.
-function findServiceAccount() {
-  if (process.env.GOOGLE_APPLICATION_CREDENTIALS) return applicationDefault();
-  const serviceAccountFile = readdirSync('./').find(
-    (f) => f.endsWith('.json') && (f.includes('firebase-adminsdk') || f === 'service-account.json'),
-  );
-  if (serviceAccountFile) {
-    console.log(`Usando credenciales de: ${serviceAccountFile}`);
-    return cert(JSON.parse(readFileSync(serviceAccountFile, 'utf8')));
-  }
-  return applicationDefault();
+function credencial() {
+  const json = credencialesJson();
+  return json ? cert(json) : applicationDefault();
 }
 
-initializeApp(emulador ? { projectId } : { credential: findServiceAccount(), projectId });
+initializeApp(emulador ? { projectId } : { credential: credencial(), projectId });
 
 const db = getFirestore();
-let uid = inputArg;
-
-if (inputArg.includes('@')) {
-  const userRecord = await getAuth().getUserByEmail(inputArg);
-  uid = userRecord.uid;
-  console.log(`Email ${inputArg} -> UID: ${uid}`);
-}
+const uid = await resolverUid(inputArg);
 
 // El catálogo de fotos no se duplica aquí: se extrae del propio seed, que es la
 // única fuente de verdad de qué foto le corresponde a cada plato.
-async function loadPlanSeed() {
-  const tsCode = readFileSync('./src/app/domain/plan.seed.ts', 'utf8');
-  const jsCode = ts.transpileModule(tsCode, {
-    compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ESNext },
-  }).outputText;
-  return import(`data:text/javascript;base64,${Buffer.from(jsCode).toString('base64')}`);
-}
-
-const { DIETA } = await loadPlanSeed();
+const { DIETA } = await cargarPlanSeed();
 
 /** nombre de plato -> fotoUrl, según el seed. */
 const catalogo = new Map();
@@ -142,7 +120,16 @@ if (dryRun) {
 
 // Sólo `dieta` y `actualizado`: `version` no se toca, para no disparar ninguna
 // lógica de resiembra ni pisar el resto del plan.
-await ref.update({ dieta, actualizado: new Date().toISOString() });
+try {
+  await ref.update({ dieta, actualizado: new Date().toISOString() });
+} catch (e) {
+  console.error(
+    `\nFallo al actualizar usuarios/${uid}/plan/actual (${e.code ?? 'error'}): ${e.message}\n` +
+      'No se ha escrito nada. Revisa los permisos del service account sobre el proyecto ' +
+      `${projectId}.`,
+  );
+  process.exit(1);
+}
 
 console.log(
   `\n✅ ${puestas.length} fotos escritas en usuarios/${uid}/plan/actual (${emulador ? 'emulador' : 'producción'}).`,
