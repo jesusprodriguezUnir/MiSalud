@@ -160,6 +160,36 @@ describe('limpiar', () => {
   });
 });
 
+describe('limpiar · ingestas que se quedan sin ítems', () => {
+  const conIngestas = (ingestas: Plan['dieta'][number]['ingestas']): Plan => ({
+    ...planBase(),
+    dieta: [{ dia: 'Lunes', ingestas }],
+  });
+
+  it('descarta la ingesta cuyos ítems se han borrado todos', () => {
+    // Si se guardara, la vista Hoy pintaría una sección con su hora y nada
+    // debajo, y el contador de progreso la sumaría como tarea del día.
+    const limpio = limpiar(conIngestas({ cena: { hora: '21:00', items: [] } }));
+    expect(limpio.dieta[0].ingestas).toEqual({});
+  });
+
+  it('descarta también la ingesta cuyos ítems se quedan todos sin nombre', () => {
+    const limpio = limpiar(conIngestas({ cena: { hora: '21:00', items: [{ n: '  ', c: '' }] } }));
+    expect(limpio.dieta[0].ingestas).toEqual({});
+  });
+
+  it('conserva las ingestas que sí tienen algún ítem con nombre', () => {
+    const limpio = limpiar(
+      conIngestas({
+        desayuno: { hora: '08:30', items: [{ n: 'Avena', c: '60 g' }, { n: '' }] },
+        cena: { hora: '21:00', items: [] },
+      }),
+    );
+    expect(Object.keys(limpio.dieta[0].ingestas)).toEqual(['desayuno']);
+    expect(limpio.dieta[0].ingestas.desayuno?.items).toHaveLength(1);
+  });
+});
+
 describe('completar', () => {
   it('rellena los siete días de dieta y entreno que el editor indexa', () => {
     const p = completar(planBase());

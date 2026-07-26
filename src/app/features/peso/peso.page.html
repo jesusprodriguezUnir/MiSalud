@@ -1,5 +1,14 @@
 @let u = ultimo();
 
+@if (desconectado()) {
+  <div class="banda-error" role="alert">
+    <span
+      >Los pesos no se están sincronizando. Los datos que ves pueden estar desactualizados.</span
+    >
+    <button class="btn ghost mini" (click)="reconectar()">Reintentar</button>
+  </div>
+}
+
 <div class="kpis">
   <div class="kpi">
     <span>Actual</span><strong>{{ u ? num(u.peso) + ' kg' : '—' }}</strong>
@@ -39,30 +48,33 @@
 
 <section class="seccion">
   <h2 class="seccion-tit">Registrar peso</h2>
-  <input
-    type="date"
-    [ngModel]="fecha()"
-    (ngModelChange)="fecha.set($event)"
-    name="fecha"
-    aria-label="Fecha del registro"
-  />
   <div class="form-row">
+    <input
+      class="input-fecha"
+      type="date"
+      [ngModel]="fecha()"
+      (ngModelChange)="fecha.set($event)"
+      name="fecha"
+      aria-label="Fecha del registro"
+    />
     <input
       class="input-lg"
       type="number"
       [(ngModel)]="pesoInput"
       name="peso"
       step="0.1"
-      min="30"
-      max="200"
+      [min]="pesoMin"
+      [max]="pesoMax"
       placeholder="0,0"
       inputmode="decimal"
       aria-label="Peso en kilogramos"
     />
     <span class="u">kg</span>
-    <button class="btn mini" (click)="guardar()">Guardar</button>
+    <button class="btn mini" (click)="guardar()" [disabled]="guardando()">
+      {{ guardando() ? 'Guardando…' : 'Guardar' }}
+    </button>
   </div>
-  <div class="err">{{ error() }}</div>
+  <div class="err" role="alert">{{ error() }}</div>
 </section>
 
 <section class="seccion">
@@ -94,7 +106,7 @@
       <tbody>
         @for (f of filas(); track f.fecha) {
           <tr>
-            <td>{{ fmtDia(f.fecha) }}</td>
+            <td>{{ f.fecha | diaCorto }}</td>
             <td class="delta" [class.down]="f.delta !== null && f.delta < 0">
               @if (f.delta !== null) {
                 {{ (f.delta > 0 ? '+' : '') + num(f.delta) }}
@@ -105,7 +117,7 @@
               <button
                 class="del"
                 (click)="borrar(f.fecha)"
-                [attr.aria-label]="'Borrar el registro del ' + fmtDia(f.fecha)"
+                [attr.aria-label]="'Borrar el registro del ' + (f.fecha | diaCorto)"
               >
                 ×
               </button>

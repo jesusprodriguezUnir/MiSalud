@@ -1,6 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { agregarCompra, categoria } from './compra.calc';
 import { DIETA } from './plan.seed';
+import type { DiaDieta } from './plan.types';
+
+/** Un día suelto con una sola ingesta, para aislar el comportamiento medido. */
+function unDia(items: { n: string; c?: string }[]): DiaDieta {
+  return { dia: 'Lunes', ingestas: { comida: { hora: '14:00', items } } };
+}
 
 describe('categoria', () => {
   it('clasifica por las regex fijas', () => {
@@ -52,5 +58,57 @@ describe('agregarCompra', () => {
     expect(aceite).toBeDefined();
     expect(aceite!.veces).toBeGreaterThan(1);
     expect(aceite!.g).toBeGreaterThan(0);
+  });
+});
+
+// El flag `aproximado` es la lógica menos evidente del módulo: marca los ítems
+// cuyo total no se puede dar por bueno porque al menos una de las apariciones
+// venía sin gramaje ("1 pieza", "al gusto"). La lista lo pinta como "120 g +".
+describe('agregarCompra · flag aproximado', () => {
+  it('no marca nada si todas las cantidades traen gramos', () => {
+    const [g] = agregarCompra([unDia([{ n: 'Pan', c: '40 g' }])], new Set([0]));
+    expect(g.items[0]).toMatchObject({ g: 40, veces: 1, aproximado: false });
+  });
+
+  it('marca el ítem cuya cantidad no lleva gramos', () => {
+    const [g] = agregarCompra([unDia([{ n: 'Naranja', c: '1 pieza' }])], new Set([0]));
+    expect(g.items[0]).toMatchObject({ g: 0, veces: 1, aproximado: true });
+  });
+
+  it('marca el ítem sin cantidad ninguna', () => {
+    const [g] = agregarCompra([unDia([{ n: 'Naranja' }])], new Set([0]));
+    expect(g.items[0].aproximado).toBe(true);
+  });
+
+  it('basta una aparición sin gramos para marcar el total, aunque haya otras con gramos', () => {
+    const [g] = agregarCompra(
+      [
+        unDia([
+          { n: 'Pan', c: '40 g' },
+          { n: 'Pan', c: 'una rebanada' },
+        ]),
+      ],
+      new Set([0]),
+    );
+    expect(g.items[0]).toMatchObject({ g: 40, veces: 2, aproximado: true });
+  });
+
+  it('acepta gramajes con coma decimal', () => {
+    const [g] = agregarCompra([unDia([{ n: 'Pan', c: '12,5 g (1 rebanada)' }])], new Set([0]));
+    expect(g.items[0]).toMatchObject({ g: 12.5, aproximado: false });
+  });
+
+  it('agrupa el mismo nombre sin distinguir mayúsculas ni espacios de más', () => {
+    const [g] = agregarCompra(
+      [
+        unDia([
+          { n: 'Pan  integral', c: '40 g' },
+          { n: 'pan integral', c: '30 g' },
+        ]),
+      ],
+      new Set([0]),
+    );
+    expect(g.items).toHaveLength(1);
+    expect(g.items[0]).toMatchObject({ g: 70, veces: 2 });
   });
 });

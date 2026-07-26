@@ -1,12 +1,27 @@
 <div class="semana bleed">
-  @for (d of dieta(); track d.dia; let i = $index) {
-    <button class="dia-fila" [class.hoy]="i === hoyI" (click)="ir(i)">
+  @for (f of filas(); track f.dia) {
+    <button
+      class="dia-fila"
+      [class.hoy]="f.esHoy"
+      [class.sel]="f.esSeleccionado"
+      [attr.aria-current]="f.esSeleccionado ? 'true' : null"
+      (click)="ir(f.i)"
+    >
       <span class="top">
-        <strong>{{ d.dia }}</strong>
-        <span class="tag" [class.gris]="!esFuerza(i)">{{ tituloCorto(i) }}</span>
+        <strong>{{ f.dia }}</strong>
+        <span class="tag" [class.gris]="!f.esFuerza">{{ f.tituloEntreno }}</span>
       </span>
-      <span class="p"><b>Comida</b> · {{ resumenComida(d) }}</span>
-      <span class="p"><b>Cena</b> · {{ resumenCena(d) }}</span>
+      <span class="p"><b>Comida</b> · {{ f.comida }}</span>
+      <span class="p"><b>Cena</b> · {{ f.cena }}</span>
+      <span
+        class="progreso-mini"
+        [attr.aria-label]="
+          'Cumplimiento: ' + f.progreso.hechas + ' de ' + f.progreso.total + ' completados'
+        "
+      >
+        <span class="barra"><i [style.width.%]="f.progreso.pct"></i></span>
+        <span class="cifra">{{ f.progreso.hechas }}/{{ f.progreso.total }}</span>
+      </span>
     </button>
   }
 </div>

@@ -1,7 +1,7 @@
-import { Injectable, inject, signal, DestroyRef } from '@angular/core';
+import { Injectable, inject, signal, computed, DestroyRef } from '@angular/core';
 import { Firestore, doc, setDoc, onSnapshot, Unsubscribe } from '@angular/fire/firestore';
 import { AuthService } from './auth.service';
-import { AvisoService } from './aviso.service';
+import { codigo } from './firebase.errors';
 import { PERFIL_DEFECTO } from '../../environments/environment';
 import { DIETA, ENTRENO, HABITOS, OBJETIVOS, PLAN_VERSION } from '../domain/plan.seed';
 import type { Perfil, Plan } from '../domain/plan.types';
@@ -25,12 +25,22 @@ import type { Perfil, Plan } from '../domain/plan.types';
 export class PlanService {
   private readonly db = inject(Firestore);
   private readonly auth = inject(AuthService);
-  private readonly avisos = inject(AvisoService);
 
   /** True hasta que perfil y plan se han resuelto contra Firestore. Mientras
    * tanto los signals de abajo contienen la semilla local, que no debe pintarse
    * como si fuera el dato remoto. */
   readonly cargando = signal(true);
+
+  /**
+   * Mensaje de error si plan o perfil no se han podido cargar. Mientras esté
+   * puesto, el shell NO debe pintar el outlet: los signals siguen conteniendo la
+   * semilla local y, en una app de salud, enseñar un plan que no es el del
+   * usuario —y dejar que lo edite creyendo que sí lo es— es peor que no enseñar
+   * nada. Se limpia en cuanto llega un snapshot bueno o al reintentar.
+   */
+  private readonly errorPerfil = signal<string | null>(null);
+  private readonly errorPlan = signal<string | null>(null);
+  readonly error = computed(() => this.errorPlan() ?? this.errorPerfil());
 
   /** True mientras hay una escritura del plan en vuelo (lo usa el editor). */
   readonly guardando = signal(false);
@@ -75,6 +85,8 @@ export class PlanService {
    */
   async cargar(): Promise<void> {
     this.cargando.set(true);
+    this.errorPerfil.set(null);
+    this.errorPlan.set(null);
     try {
       await Promise.all([this.escucharPerfil(), this.escucharPlan()]);
     } finally {
@@ -82,11 +94,27 @@ export class PlanService {
     }
   }
 
+  /** Vuelve a intentar la carga tras un error (botón "Reintentar" del shell). */
+  async reintentar(): Promise<void> {
+    this.detener();
+    await this.cargar();
+  }
+
   detener(): void {
     this.unsubPerfil?.();
     this.unsubPlan?.();
     this.unsubPerfil = null;
     this.unsubPlan = null;
+  }
+
+  /** Cierra los streams y devuelve los signals a su estado inicial (logout). */
+  reset(): void {
+    this.detener();
+    this.plan.set(this.semilla());
+    this.perfil.set({ ...PERFIL_DEFECTO });
+    this.errorPerfil.set(null);
+    this.errorPlan.set(null);
+    this.cargando.set(true);
   }
 
   private escucharPerfil(): Promise<void> {
@@ -102,18 +130,19 @@ export class PlanService {
       this.unsubPerfil = onSnapshot(
         this.refPerfil(),
         (snap) => {
+          this.errorPerfil.set(null);
           if (snap.exists()) {
             this.perfil.set({ ...PERFIL_DEFECTO, ...(snap.data() as Partial<Perfil>) });
           } else if (!snap.metadata.fromCache) {
-            void setDoc(this.refPerfil(), this.perfil()).catch((e) =>
+            void setDoc(this.refPerfil(), this.perfil()).catch((e: unknown) =>
               console.warn('sembrar perfil', e),
             );
           }
           listo();
         },
         (e) => {
-          console.warn('perfil', e);
-          this.avisos.mostrar('No se ha podido cargar tu perfil.');
+          console.warn('perfil', codigo(e), e);
+          this.errorPerfil.set('No se ha podido cargar tu perfil.');
           listo();
         },
       );
@@ -133,6 +162,7 @@ export class PlanService {
       this.unsubPlan = onSnapshot(
         this.refPlan(),
         (snap) => {
+          this.errorPlan.set(null);
           const data = snap.data() as Plan | undefined;
           if (snap.exists() && data) {
             this.plan.set({
@@ -146,13 +176,15 @@ export class PlanService {
           } else if (!snap.metadata.fromCache) {
             const semilla: Plan = { ...this.semilla(), actualizado: new Date().toISOString() };
             this.plan.set(semilla);
-            void setDoc(this.refPlan(), semilla).catch((e) => console.warn('sembrar plan', e));
+            void setDoc(this.refPlan(), semilla).catch((e: unknown) =>
+              console.warn('sembrar plan', e),
+            );
           }
           listo();
         },
         (e) => {
-          console.warn('plan', e);
-          this.avisos.mostrar('No se ha podido cargar el plan.');
+          console.warn('plan', codigo(e), e);
+          this.errorPlan.set('No se ha podido cargar el plan.');
           listo();
         },
       );

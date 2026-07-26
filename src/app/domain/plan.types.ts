@@ -52,6 +52,27 @@ export const ORDEN_INGESTAS: readonly IngestaKey[] = [
   'cena',
 ] as const;
 
+/** Etiqueta visible de cada ingesta. Única fuente: la usan Hoy, el editor de
+ * Plan y la exportación a calendario, que antes tenían cada uno su copia. */
+export const NOMBRE_INGESTA: Record<IngestaKey, string> = {
+  desayuno: 'Desayuno',
+  tentempie: 'Tentempié',
+  comida: 'Comida',
+  merienda: 'Merienda',
+  cena: 'Cena',
+};
+
+/** Hora por defecto de cada ingesta: la que se asigna al crear una ingesta que
+ * el día aún no tenía y la que usa el .ics cuando el plan no trae hora. Estaba
+ * duplicada con dos valores distintos para la cena (20:00 vs 21:00). */
+export const HORA_POR_DEFECTO: Record<IngestaKey, string> = {
+  desayuno: '08:30',
+  tentempie: '11:00',
+  comida: '14:00',
+  merienda: '17:30',
+  cena: '21:00',
+};
+
 export interface DiaDieta {
   dia: string;
   entrenoFuerte?: boolean;
@@ -118,6 +139,22 @@ export interface EstadoDia {
   fecha?: string;
   hechas: Partial<Record<IngestaKey, boolean>>;
   entreno: boolean;
+}
+
+// -------------------------------------------------------------- validación ---
+// Rangos admitidos para los datos numéricos que el usuario teclea. Estaban
+// escritos a mano en cada pantalla y, para el peso, también en `firestore.rules`
+// (que no puede importar de aquí: hay un comentario allí apuntando a estas
+// constantes para que no se desfasen).
+
+export const PESO_MIN = 30;
+export const PESO_MAX = 200;
+export const ALTURA_MIN = 100;
+export const ALTURA_MAX = 250;
+
+/** True si el peso está dentro del rango que aceptan la UI y las reglas. */
+export function pesoValido(peso: number): boolean {
+  return Number.isFinite(peso) && peso > PESO_MIN && peso < PESO_MAX;
 }
 
 /** Type guard para el `@switch` de la plantilla. */

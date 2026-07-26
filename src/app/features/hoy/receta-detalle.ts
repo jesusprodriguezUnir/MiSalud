@@ -9,7 +9,9 @@ import { FotoPlaceholder } from '../../shared/foto-placeholder';
   imports: [FotoPlaceholder],
   template: `
     <details class="rec">
-      <summary>Ver receta</summary>
+      <!-- Con el nombre del plato: "Ver receta" repetido cinco veces en la
+           pantalla no le dice nada a un lector de pantalla. -->
+      <summary>Ver receta{{ plato() ? ' de ' + plato() : '' }}</summary>
       <div class="rec-body">
         <app-foto-placeholder
           variante="plato"
@@ -36,4 +38,6 @@ import { FotoPlaceholder } from '../../shared/foto-placeholder';
 })
 export class RecetaDetalle {
   readonly receta = input.required<Receta>();
+  /** Nombre del plato al que pertenece la receta. */
+  readonly plato = input('');
 }

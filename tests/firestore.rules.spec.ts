@@ -77,6 +77,24 @@ describe('validación de pesos', () => {
     );
   });
 
+  it('rechaza que data.fecha no coincida con el id del documento', async () => {
+    // Si se aceptara, el orderBy('fecha') del stream devolvería los pesos
+    // desordenados y la media móvil se calcularía sobre una serie falsa.
+    await assertFails(setDoc(ref(), { fecha: '2030-01-01', peso: 65 }));
+  });
+
+  it('rechaza un documento sin fecha', async () => {
+    await assertFails(setDoc(ref(), { peso: 65 }));
+  });
+
+  it('rechaza una clave que la app no escribe', async () => {
+    await assertFails(setDoc(ref(), { fecha: '2026-06-01', peso: 65, nota: 'ayuno' }));
+  });
+
+  it('rechaza un peso que no es número', async () => {
+    await assertFails(setDoc(ref(), { fecha: '2026-06-01', peso: '65' }));
+  });
+
   it('permite borrar un registro propio', async () => {
     await setDoc(ref(), { fecha: '2026-06-01', peso: 65 });
     await assertSucceeds(deleteDoc(ref()));
@@ -164,6 +182,57 @@ describe('días', () => {
   it('rechaza un id de día mal formado', async () => {
     await assertFails(
       setDoc(doc(db(ANA), `usuarios/${ANA}/dias/junio-1`), { hechas: {}, entreno: false }),
+    );
+  });
+
+  it('rechaza que data.fecha no coincida con el id', async () => {
+    await assertFails(
+      setDoc(doc(db(ANA), `usuarios/${ANA}/dias/2026-06-01`), {
+        fecha: '2026-06-02',
+        hechas: {},
+        entreno: false,
+      }),
+    );
+  });
+
+  it('rechaza una ingesta que no existe en el dominio', async () => {
+    await assertFails(
+      setDoc(doc(db(ANA), `usuarios/${ANA}/dias/2026-06-01`), {
+        fecha: '2026-06-01',
+        hechas: { brunch: true },
+        entreno: false,
+      }),
+    );
+  });
+
+  it('rechaza una clave de nivel superior que la app no escribe', async () => {
+    await assertFails(
+      setDoc(doc(db(ANA), `usuarios/${ANA}/dias/2026-06-01`), {
+        fecha: '2026-06-01',
+        hechas: {},
+        entreno: false,
+        notas: 'algo',
+      }),
+    );
+  });
+
+  it('acepta un merge parcial sin el campo fecha', async () => {
+    await assertSucceeds(
+      setDoc(
+        doc(db(ANA), `usuarios/${ANA}/dias/2026-06-01`),
+        { hechas: { cena: true } },
+        { merge: true },
+      ),
+    );
+  });
+
+  it('rechaza entreno que no es booleano', async () => {
+    await assertFails(
+      setDoc(doc(db(ANA), `usuarios/${ANA}/dias/2026-06-01`), {
+        fecha: '2026-06-01',
+        hechas: {},
+        entreno: 'si',
+      }),
     );
   });
 });

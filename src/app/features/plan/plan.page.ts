@@ -11,7 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { PlanService } from '../../core/plan.service';
 import { AvisoService } from '../../core/aviso.service';
 import { idxDia } from '../../domain/fecha.util';
-import { ORDEN_INGESTAS } from '../../domain/plan.types';
+import { NOMBRE_INGESTA, ORDEN_INGESTAS } from '../../domain/plan.types';
 import type {
   BloqueEntreno,
   DiaDieta,
@@ -41,16 +41,16 @@ import {
   quitar,
   reemplazar,
 } from '../../domain/plan.edit';
-
-const NOMBRE_INGESTA: Record<IngestaKey, string> = {
-  desayuno: 'Desayuno',
-  tentempie: 'Tentempié',
-  comida: 'Comida',
-  merienda: 'Merienda',
-  cena: 'Cena',
-};
+import { EditAcciones } from './edit-acciones';
 
 type Pestana = 'dieta' | 'entreno' | 'habitos' | 'objetivos';
+
+const PESTANAS: readonly { key: Pestana; etiqueta: string }[] = [
+  { key: 'dieta', etiqueta: 'Dieta' },
+  { key: 'entreno', etiqueta: 'Entreno' },
+  { key: 'habitos', etiqueta: 'Hábitos' },
+  { key: 'objetivos', etiqueta: 'Objetivos' },
+];
 
 // Editor del plan (dieta con recetas, entrenamiento, hábitos y objetivos).
 //
@@ -63,7 +63,7 @@ type Pestana = 'dieta' | 'entreno' | 'habitos' | 'objetivos';
 @Component({
   selector: 'app-plan',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule],
+  imports: [FormsModule, EditAcciones],
   templateUrl: './plan.page.html',
   styleUrl: './plan.page.scss',
 })
@@ -74,6 +74,7 @@ export class PlanPage {
   readonly nombreDia = NOMBRE_DIA;
   readonly nombreIngesta = NOMBRE_INGESTA;
   readonly ordenIngestas = ORDEN_INGESTAS;
+  readonly pestanas = PESTANAS;
   readonly tipos: readonly TipoEntreno[] = ['fuerza', 'movilidad', 'cardio'];
 
   readonly pestana = signal<Pestana>('dieta');
@@ -83,13 +84,13 @@ export class PlanPage {
 
   readonly borrador = signal<Plan>(completar(clonar(this.planSvc.plan())));
 
-  /** Hay cambios sin guardar. Se compara el plan ya limpio para que retocar un
-   * espacio en blanco no cuente como edición. */
-  readonly sucio = computed(
-    () =>
-      JSON.stringify(this.sinMarca(limpiar(this.borrador()))) !==
-      JSON.stringify(this.sinMarca(limpiar(completar(this.planSvc.plan())))),
-  );
+  /**
+   * Hay cambios sin guardar. Es un flag, no una comparación: antes se hacían dos
+   * `limpiar()` y dos `JSON.stringify()` del plan completo (~750 líneas de seed)
+   * en cada pulsación de tecla, y en móvil se notaba. Todas las mutaciones pasan
+   * por `mutar()`, así que basta con marcarlo ahí.
+   */
+  readonly sucio = signal(false);
 
   constructor() {
     effect(() => {
@@ -97,21 +98,22 @@ export class PlanPage {
       // `sucio` se lee sin rastrear: este effect solo debe dispararse cuando
       // cambia el plan remoto, no cada vez que se teclea en el borrador.
       if (!untracked(this.sucio)) {
-        untracked(() => this.borrador.set(completar(clonar(remoto))));
+        untracked(() => this.resetBorrador(remoto));
       }
     });
   }
 
-  /** El plan sin `actualizado`: lo pone el servicio en cada escritura y
-   * compararlo haría que el borrador saliera sucio nada más guardar. */
-  private sinMarca(p: Plan): Omit<Plan, 'actualizado'> {
-    return {
-      version: p.version,
-      dieta: p.dieta,
-      entreno: p.entreno,
-      habitos: p.habitos,
-      objetivos: p.objetivos,
-    };
+  /** Única puerta de entrada a `borrador`: aplica el cambio y marca el borrador
+   * como sucio. Ningún `set*` debe tocar el signal directamente. */
+  private mutar(fn: (p: Plan) => Plan): void {
+    this.borrador.update(fn);
+    this.sucio.set(true);
+  }
+
+  /** Deja el borrador en sincronía con `plan` y lo marca como limpio. */
+  private resetBorrador(plan: Plan): void {
+    this.borrador.set(completar(clonar(plan)));
+    this.sucio.set(false);
   }
 
   // ------------------------------------------------------------------ dieta —
@@ -122,8 +124,16 @@ export class PlanPage {
     ORDEN_INGESTAS.map((key) => ({ key, ingesta: this.dia().ingestas[key] })),
   );
 
+  /** True si el día no tiene ninguna comida con al menos un alimento con nombre:
+   * lo señala la pastilla del día para no dejar huecos sin querer. */
+  diaIncompleto(i: number): boolean {
+    const dia = this.borrador().dieta[i];
+    if (!dia) return true;
+    return !ORDEN_INGESTAS.some((k) => dia.ingestas[k]?.items.some((it) => it.n.trim().length > 0));
+  }
+
   private setDia(patch: Partial<DiaDieta>): void {
-    this.borrador.update((p) => ({
+    this.mutar((p) => ({
       ...p,
       dieta: reemplazar(p.dieta, this.diaSel(), { ...p.dieta[this.diaSel()], ...patch }),
     }));
@@ -148,9 +158,27 @@ export class PlanPage {
     this.setIngesta(key, ingestaVacia(key));
   }
 
+  /**
+   * Quita la ingesta del día y ofrece deshacerlo en el toast, en vez de pedir
+   * confirmación con el `confirm()` nativo. El borrado solo toca el borrador
+   * local —nada se ha escrito aún en Firestore—, así que revertirlo es trivial.
+   */
   quitarIngesta(key: IngestaKey): void {
-    if (!confirm(`¿Quitar ${NOMBRE_INGESTA[key].toLowerCase()} de este día?`)) return;
+    const dia = this.diaSel();
+    const previa = this.dia().ingestas[key];
     this.setIngesta(key, undefined);
+    if (previa) {
+      this.deshacerBorrado(NOMBRE_INGESTA[key], () => {
+        // El usuario puede haber cambiado de día antes de pulsar "Deshacer".
+        this.diaSel.set(dia);
+        this.setIngesta(key, previa);
+      });
+    }
+  }
+
+  /** Toast "X borrado · Deshacer" común a todos los borrados del editor. */
+  private deshacerBorrado(que: string, restaurar: () => void): void {
+    this.avisos.deshacer(`${que} borrado. Recuerda guardar el plan.`, restaurar);
   }
 
   setHora(key: IngestaKey, hora: string): void {
@@ -175,9 +203,16 @@ export class PlanPage {
     if (ing) this.setItems(key, [...ing.items, itemVacio()]);
   }
 
-  borrarItem(key: IngestaKey, i: number): void {
+  borrarItem(key: IngestaKey, i: number, nombre = ''): void {
     const ing = this.dia().ingestas[key];
-    if (ing) this.setItems(key, quitar(ing.items, i));
+    if (!ing) return;
+    const dia = this.diaSel();
+    const previos = ing.items;
+    this.setItems(key, quitar(previos, i));
+    this.deshacerBorrado(nombre.trim() || `Alimento ${i + 1}`, () => {
+      this.diaSel.set(dia);
+      this.setItems(key, previos);
+    });
   }
 
   moverItem(key: IngestaKey, i: number, delta: number): void {
@@ -222,7 +257,7 @@ export class PlanPage {
   readonly entreno = computed<DiaEntreno>(() => this.borrador().entreno[this.diaSel()]);
 
   setEntreno(patch: Partial<DiaEntreno>): void {
-    this.borrador.update((p) => ({
+    this.mutar((p) => ({
       ...p,
       entreno: reemplazar(p.entreno, this.diaSel(), { ...p.entreno[this.diaSel()], ...patch }),
     }));
@@ -235,8 +270,14 @@ export class PlanPage {
   anadirBloque(): void {
     this.setBloques([...this.entreno().bloques, { t: '', e: [] }]);
   }
-  borrarBloque(i: number): void {
-    this.setBloques(quitar(this.entreno().bloques, i));
+  borrarBloque(i: number, titulo = ''): void {
+    const dia = this.diaSel();
+    const previos = this.entreno().bloques;
+    this.setBloques(quitar(previos, i));
+    this.deshacerBorrado(titulo.trim() || `Bloque ${i + 1}`, () => {
+      this.diaSel.set(dia);
+      this.setBloques(previos);
+    });
   }
   moverBloque(i: number, delta: number): void {
     this.setBloques(mover(this.entreno().bloques, i, delta));
@@ -259,35 +300,43 @@ export class PlanPage {
   readonly objetivos = computed(() => this.borrador().objetivos);
 
   setHabito(i: number, patch: Partial<Habito>): void {
-    this.borrador.update((p) => ({
+    this.mutar((p) => ({
       ...p,
       habitos: reemplazar(p.habitos, i, { ...p.habitos[i], ...patch }),
     }));
   }
   anadirHabito(): void {
-    this.borrador.update((p) => ({ ...p, habitos: [...p.habitos, habitoVacio()] }));
+    this.mutar((p) => ({ ...p, habitos: [...p.habitos, habitoVacio()] }));
   }
-  borrarHabito(i: number): void {
-    this.borrador.update((p) => ({ ...p, habitos: quitar(p.habitos, i) }));
+  borrarHabito(i: number, titulo = ''): void {
+    const previos = this.habitos();
+    this.mutar((p) => ({ ...p, habitos: quitar(p.habitos, i) }));
+    this.deshacerBorrado(titulo.trim() || `Hábito ${i + 1}`, () =>
+      this.mutar((p) => ({ ...p, habitos: previos })),
+    );
   }
   moverHabito(i: number, delta: number): void {
-    this.borrador.update((p) => ({ ...p, habitos: mover(p.habitos, i, delta) }));
+    this.mutar((p) => ({ ...p, habitos: mover(p.habitos, i, delta) }));
   }
 
   setObjetivo(i: number, patch: Partial<Objetivo>): void {
-    this.borrador.update((p) => ({
+    this.mutar((p) => ({
       ...p,
       objetivos: reemplazar(p.objetivos, i, { ...p.objetivos[i], ...patch }),
     }));
   }
   anadirObjetivo(): void {
-    this.borrador.update((p) => ({ ...p, objetivos: [...p.objetivos, objetivoVacio()] }));
+    this.mutar((p) => ({ ...p, objetivos: [...p.objetivos, objetivoVacio()] }));
   }
-  borrarObjetivo(i: number): void {
-    this.borrador.update((p) => ({ ...p, objetivos: quitar(p.objetivos, i) }));
+  borrarObjetivo(i: number, titulo = ''): void {
+    const previos = this.objetivos();
+    this.mutar((p) => ({ ...p, objetivos: quitar(p.objetivos, i) }));
+    this.deshacerBorrado(titulo.trim() || `Objetivo ${i + 1}`, () =>
+      this.mutar((p) => ({ ...p, objetivos: previos })),
+    );
   }
   moverObjetivo(i: number, delta: number): void {
-    this.borrador.update((p) => ({ ...p, objetivos: mover(p.objetivos, i, delta) }));
+    this.mutar((p) => ({ ...p, objetivos: mover(p.objetivos, i, delta) }));
   }
 
   // ------------------------------------------------------------------ texto —
@@ -299,11 +348,12 @@ export class PlanPage {
   // --------------------------------------------------------------- guardado —
 
   async guardar(): Promise<void> {
+    if (this.guardando()) return;
     this.error.set('');
     const plan = limpiar(this.borrador());
     try {
       await this.planSvc.actualizarPlan(plan);
-      this.borrador.set(completar(clonar(plan)));
+      this.resetBorrador(plan);
       this.avisos.mostrar('Plan guardado.', 'ok');
     } catch (e) {
       console.warn('guardarPlan', e);
@@ -311,9 +361,15 @@ export class PlanPage {
     }
   }
 
+  /** Vuelve al plan remoto. Ofrece deshacer en vez de bloquear con `confirm()`. */
   descartar(): void {
-    if (this.sucio() && !confirm('¿Descartar los cambios sin guardar?')) return;
-    this.borrador.set(completar(clonar(this.planSvc.plan())));
+    if (!this.sucio()) return;
+    const previo = this.borrador();
+    this.resetBorrador(this.planSvc.plan());
     this.error.set('');
+    this.avisos.deshacer('Cambios descartados.', () => {
+      this.borrador.set(previo);
+      this.sucio.set(true);
+    });
   }
 }

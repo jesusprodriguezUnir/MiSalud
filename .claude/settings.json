@@ -14,7 +14,12 @@
       "Bash(command -v chromium-cli)",
       "Bash(java -version)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:4200/)",
-      "Bash(curl -s http://localhost:4200/)"
+      "Bash(curl -s http://localhost:4200/)",
+      "PowerShell($dst = \"$env:USERPROFILE\\\\.config\\\\misalud\"; New-Item -ItemType Directory -Force $dst | Out-Null; $src = \"d:\\\\Personal\\\\MiSalud\\\\misalud-133ef-firebase-adminsdk-fbsvc-474d4bda53.json\"; Copy-Item $src \"$dst\\\\sa.json\" -Force; if \\(\\(Get-FileHash $src\\).Hash -eq \\(Get-FileHash \"$dst\\\\sa.json\"\\).Hash\\) { Remove-Item $src -Force; \"Movido a $dst\\\\sa.json y eliminado del repo\" } else { \"ERROR: la copia no coincide, no se borra el original\" })",
+      "Bash(npx vitest *)",
+      "Bash(npx ng *)",
+      "Bash(npm i *)",
+      "PowerShell($j = Get-Command java -ErrorAction SilentlyContinue; if \\($j\\) { $j.Source } else { \"java no encontrado en PATH\" }; Get-ChildItem \"C:\\\\Program Files\\\\Java\",\"C:\\\\Program Files\\\\Eclipse Adoptium\",\"$env:LOCALAPPDATA\\\\Programs\" -ErrorAction SilentlyContinue -Directory | Select-Object -ExpandProperty FullName)"
     ]
   }
 }

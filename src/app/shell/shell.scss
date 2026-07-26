@@ -37,6 +37,7 @@ header {
   min-width: 0;
 }
 .hbar .nav {
+  position: relative;
   background: var(--surface);
   border: 2px solid var(--line);
   border-radius: var(--radius);
@@ -47,6 +48,32 @@ header {
   flex: 0 0 auto;
   font-size: 18px;
   color: var(--accent);
+}
+// La caja visible se queda en 34 px (es la que pide el diseño), pero el área
+// táctil se estira a 44 px con un ::after invisible, igual que en `.chk`.
+.hbar .nav::after,
+.theme-toggle::after,
+.btn-hoy::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+}
+// Botón para volver al día de hoy tras navegar lejos con las flechas.
+.btn-hoy {
+  position: relative;
+  flex: 0 0 auto;
+  height: 34px;
+  padding: 0 10px;
+  background: none;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--accent);
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  font-size: 12px;
+}
+.btn-hoy:hover {
+  border-color: var(--accent);
 }
 .hdate {
   flex: 1;
@@ -67,6 +94,7 @@ header {
 }
 // Botones de icono de la cabecera: tema y ajustes comparten caja.
 .theme-toggle {
+  position: relative;
   flex: 0 0 auto;
   width: 34px;
   height: 34px;
@@ -97,6 +125,8 @@ header {
 }
 .logout {
   flex: 0 0 auto;
+  min-height: 44px;
+  padding: 0 6px;
   font-size: 12px;
   color: var(--muted);
   background: none;

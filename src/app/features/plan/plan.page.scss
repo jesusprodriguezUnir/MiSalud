@@ -25,13 +25,9 @@
   justify-content: space-between;
   gap: 10px;
 }
-.edit-acciones {
-  display: flex;
-  gap: 2px;
-}
-.edit-acciones .del:disabled {
-  opacity: 0.3;
-}
+// El clúster ↑↓✕ vive ahora en <app-edit-acciones>, con sus propios estilos: la
+// encapsulación de vistas impide que las reglas de esta hoja lleguen dentro del
+// componente hijo.
 
 // La receta se sangra para que se lea como parte del alimento y no como otro.
 .edit-receta {

@@ -6,6 +6,13 @@ on:
   pull_request:
     branches: [main]
 
+# Dos pushes seguidos a main solapaban dos despliegues, con el riesgo de que el
+# más viejo terminara el último. Se serializan sin cancelar: cancelar a mitad de
+# un deploy es peor que esperar.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build-test:
     runs-on: ubuntu-latest
@@ -31,14 +38,29 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      # Informativo: no bloquea el pipeline, pero deja el aviso a la vista.
+      - name: Auditoría de dependencias
+        run: npm audit --audit-level=high
+        continue-on-error: true
+
       - name: Tests de lógica pura
-        run: npm test
+        run: npm run test:coverage
 
       - name: Tests de reglas de Firestore (emulador)
         run: npx firebase emulators:exec --only firestore "npx vitest run --config vitest.rules.config.ts"
 
       - name: Build de producción
         run: npm run build
+
+      # El job de deploy reutiliza este artefacto en vez de volver a compilar:
+      # antes se construía dos veces lo mismo y nada garantizaba que fuera igual.
+      - name: Subir dist
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 3
 
   deploy:
     needs: build-test
@@ -51,15 +73,33 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run build
 
-      # Publica hosting Y reglas de Firestore con la cuenta de servicio.
-      # Crea el secret FIREBASE_SERVICE_ACCOUNT con el JSON de la cuenta de
-      # servicio (Consola > Configuración > Cuentas de servicio > Generar clave).
-      - name: Desplegar a Firebase
+      - name: Descargar dist
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      # Hosting va por el CLI; las reglas, por scripts/deploy-rules.mjs.
+      #
+      # `firebase deploy --only firestore:rules` comprueba antes que la API de
+      # Firestore esté habilitada, lo que exige `serviceusage.services.get`: un
+      # permiso que la cuenta de servicio de Firebase Admin no trae. Por eso
+      # existe el script, que publica el ruleset por la API de firebaserules
+      # directamente. Si el SA de CI tuviera ese permiso el CLI también valdría,
+      # pero esta vía funciona en ambos casos y no se queda muda si falla.
+      - name: Desplegar hosting
         run: |
           echo "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
           export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
-          npx firebase deploy --only firestore:rules,hosting --non-interactive
+          npx firebase deploy --only hosting --non-interactive
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
+      - name: Desplegar reglas de Firestore
+        run: |
+          echo "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
+          npm run deploy:rules
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}

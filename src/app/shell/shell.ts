@@ -1,5 +1,12 @@
-import { Component, ChangeDetectionStrategy, inject, effect, computed } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  inject,
+  effect,
+  computed,
+  signal,
+} from '@angular/core';
+import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { TitleCasePipe } from '@angular/common';
 import { AuthService } from '../core/auth.service';
 import { PlanService } from '../core/plan.service';
@@ -8,6 +15,7 @@ import { DiaService } from '../core/dia.service';
 import { NavegacionService } from '../core/navegacion.service';
 import { ConectividadService } from '../core/conectividad.service';
 import { ThemeService } from '../core/theme.service';
+import { diaSemana } from '../domain/fecha.util';
 import { FechaLargaPipe } from '../shared/pipes/fecha-larga.pipe';
 import { AvisoToast } from './aviso-toast';
 
@@ -26,19 +34,24 @@ export class Shell {
   private readonly planSvc = inject(PlanService);
   private readonly pesoSvc = inject(PesoService);
   private readonly diaSvc = inject(DiaService);
+  private readonly router = inject(Router);
   readonly nav = inject(NavegacionService);
   readonly conectividad = inject(ConectividadService);
   readonly theme = inject(ThemeService);
 
-  readonly diaSemana = computed(() =>
-    this.nav.fecha().toLocaleDateString('es-ES', { weekday: 'long' }),
-  );
+  readonly diaSemana = computed(() => diaSemana(this.nav.fecha()));
   readonly temaLabel = computed(() =>
     this.theme.tema() === 'claro' ? 'Modo oscuro' : 'Modo claro',
   );
+
+  /** Error de carga del plan/perfil: mientras esté puesto no se pinta el outlet. */
+  readonly error = this.planSvc.error;
+  readonly reintentando = signal(false);
+
   /** Hasta que el plan remoto no ha respondido se muestra un esqueleto: los
-   * signals contienen la semilla local y pintarla sería mentir. */
-  readonly listo = computed(() => !this.planSvc.cargando());
+   * signals contienen la semilla local y pintarla sería mentir. Lo mismo vale si
+   * la carga ha fallado: en ese caso se pinta la pantalla de error. */
+  readonly listo = computed(() => !this.planSvc.cargando() && !this.error());
 
   constructor() {
     // Cuando hay usuario, arranca la carga de datos una sola vez.
@@ -59,10 +72,28 @@ export class Shell {
     this.pesoSvc.escuchar();
   }
 
-  logout(): void {
-    this.pesoSvc.detener();
-    this.planSvc.detener();
-    this.diaSvc.detener();
-    void this.auth.logout();
+  async reintentar(): Promise<void> {
+    if (this.reintentando()) return;
+    this.reintentando.set(true);
+    try {
+      await this.planSvc.reintentar();
+      this.pesoSvc.reconectar();
+    } finally {
+      this.reintentando.set(false);
+    }
+  }
+
+  /**
+   * Cierra la sesión: para los streams, **borra los datos de memoria** y navega
+   * a /login. Sin el reset, los signals seguían conteniendo peso, plan y checks
+   * del usuario; sin la navegación, el guard no llega a evaluarse (solo corre al
+   * navegar) y la pantalla seguía mostrando esos datos de salud tras "Salir".
+   */
+  async logout(): Promise<void> {
+    this.pesoSvc.reset();
+    this.planSvc.reset();
+    this.diaSvc.reset();
+    await this.auth.logout();
+    await this.router.navigate(['/login']);
   }
 }

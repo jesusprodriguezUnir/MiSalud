@@ -11,6 +11,11 @@ import { AvisoService } from '../core/aviso.service';
       @if (avisos.aviso(); as a) {
         <div class="toast" [class.ok]="a.tipo === 'ok'">
           <span>{{ a.texto }}</span>
+          @if (a.accion; as accion) {
+            <button type="button" class="accion" (click)="avisos.ejecutarAccion()">
+              {{ accion.etiqueta }}
+            </button>
+          }
           <button type="button" (click)="avisos.cerrar()" aria-label="Cerrar aviso">×</button>
         </div>
       }
@@ -52,6 +57,16 @@ import { AvisoService } from '../core/aviso.service';
         color: var(--muted);
         font-size: 18px;
         line-height: 1;
+        min-width: 44px;
+        min-height: 44px;
+      }
+      .toast .accion {
+        color: var(--accent);
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        white-space: nowrap;
       }
       @media (min-width: 960px) {
         .toast-zona {

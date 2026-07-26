@@ -34,7 +34,7 @@ export const ORDEN_CATEGORIAS = [
 ];
 
 export function categoria(nombre: string): string {
-  return (CATS.find(([re]) => re.test(nombre)) ?? [null, 'Otros'])[1] as string;
+  return CATS.find(([re]) => re.test(nombre))?.[1] ?? 'Otros';
 }
 
 export interface ItemCompra {

@@ -10,13 +10,16 @@
       <h1>{{ diaSemana() }}</h1>
     </div>
 
-    <div class="progreso" [class.completo]="hechasTotal() === total()">
+    <div class="progreso" [class.completo]="completo()">
       <div class="progreso-num">
         <span class="kicker">Progreso del día</span>
         <strong>{{ pct() }}</strong
         ><em>%</em>
         <span>{{ hechasTotal() }} de {{ total() }}</span>
       </div>
+      @if (completo()) {
+        <p class="progreso-hecho" role="status">🎉 Día completo. Todo hecho.</p>
+      }
       <div
         class="progreso-barra"
         role="img"
@@ -67,12 +70,17 @@
                 <span class="nota">{{ it.nota }}</span>
               }
               @if (tieneReceta(it)) {
-                <app-receta-detalle [receta]="it.receta" />
+                <app-receta-detalle [receta]="it.receta" [plato]="it.n" />
               }
             </div>
             <div class="c">{{ tieneReceta(it) ? 'receta' : it.c || '' }}</div>
           </div>
         }
+      </section>
+    } @empty {
+      <section class="seccion">
+        <p class="empty">Este día no tiene comidas en el plan.</p>
+        <a class="btn ghost mini" routerLink="/plan">Editar el plan</a>
       </section>
     }
   </div>

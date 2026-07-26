@@ -2,6 +2,7 @@ import { Injectable, inject, signal, DestroyRef } from '@angular/core';
 import { Firestore, doc, setDoc, onSnapshot, Unsubscribe } from '@angular/fire/firestore';
 import { AuthService } from './auth.service';
 import { AvisoService } from './aviso.service';
+import { codigo, esPermanente } from './firebase.errors';
 import type { EstadoDia, IngestaKey } from '../domain/plan.types';
 
 // Estado por día (comidas marcadas y entreno hecho). Cachea en memoria en un
@@ -25,19 +26,7 @@ import type { EstadoDia, IngestaKey } from '../domain/plan.types';
 // código transitorio aunque el cambio siga encolado en la caché y acabe
 // subiendo. Revertir ahí desmarcaba el check delante del usuario y, peor,
 // dejaba el signal local por detrás del dato que ya iba camino del servidor.
-// Solo los códigos de abajo significan "esta escritura no va a suceder nunca".
-const ERRORES_PERMANENTES = new Set([
-  'permission-denied',
-  'unauthenticated',
-  'invalid-argument',
-  'failed-precondition',
-  'not-found',
-  'out-of-range',
-]);
-
-function codigo(e: unknown): string {
-  return (e as { code?: string }).code ?? '';
-}
+// `esPermanente()` (en firebase.errors) es quien distingue ambos casos.
 
 const VACIO: EstadoDia = { hechas: {}, entreno: false };
 
@@ -110,6 +99,13 @@ export class DiaService {
     this.fechaEscuchada = null;
   }
 
+  /** Cierra el stream y vacía la caché. Se llama al cerrar sesión: los checks
+   * de comidas son datos de salud y no deben sobrevivir al logout en memoria. */
+  reset(): void {
+    this.detener();
+    this.cache.set(new Map());
+  }
+
   /** Estado ya cargado en caché (sin ir a red). */
   estado(fecha: string): EstadoDia {
     return this.cache().get(fecha) ?? VACIO;
@@ -135,7 +131,7 @@ export class DiaService {
     } catch (e) {
       const cod = codigo(e);
       console.warn('guardarDia', cod, e);
-      if (ERRORES_PERMANENTES.has(cod)) {
+      if (esPermanente(e)) {
         this.set(fecha, previo);
         this.avisos.mostrar(`No se ha podido guardar el cambio (${cod || 'error'}).`);
       } else {
